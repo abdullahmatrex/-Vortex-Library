@@ -1,4 +1,4 @@
---// VORTEX GOLDEN EDITION - BUG FREE FIXED CORE
+--// VORTEX GOLDEN EDITION - PERFECTED VISUALS
 local Vortex = {}
 local UIS, TweenService, RunService = game:GetService("UserInputService"), game:GetService("TweenService"), game:GetService("RunService")
 local Blur = Instance.new("BlurEffect", game.Lighting); Blur.Size = 0
@@ -21,19 +21,35 @@ task.spawn(function()
     Blur.Size = 0
 end)
 
---// [2. القائمة الرئيسية]
+--// [2. القائمة الرئيسية - ضبط التموضع والحواف]
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.fromOffset(450, 350); MainFrame.Position = UDim2.fromScale(0.5, 0.5); MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20); MainFrame.BackgroundTransparency = 0.1; MainFrame.Visible = false; MainFrame.ClipsDescendants = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+MainFrame.Size = UDim2.fromOffset(450, 350)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- حل مشكلة نزول القائمة لأسفل
+MainFrame.Position = UDim2.fromScale(0.5, 0.5) -- في منتصف الشاشة تماماً
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+MainFrame.BackgroundTransparency = 0.15
+MainFrame.Visible = false
+MainFrame.ClipsDescendants = true
+local FrameCorner = Instance.new("UICorner", MainFrame)
+FrameCorner.CornerRadius = UDim.new(0, 14) -- حواف ناعمة وفخمة
 
---// [نظام الفقاعات 3D]
+--// [نظام الفقاعات 3D - إصلاح الظهور]
 local function CreateBubble()
-    local b = Instance.new("Frame", MainFrame); b.Size = UDim2.fromOffset(8, 8); b.Position = UDim2.new(math.random(), 0, 1.2, 0); b.BackgroundColor3 = Color3.fromRGB(0, 140, 255); b.ZIndex = 0
+    local b = Instance.new("Frame", MainFrame)
+    b.Size = UDim2.fromOffset(8, 8)
+    b.Position = UDim2.new(math.random(), 0, 1.1, 0)
+    b.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+    b.BackgroundTransparency = 0.4
+    b.ZIndex = 1 -- جعلها تظهر فوق الخلفية وتحت الأزرار
     Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
-    TweenService:Create(b, TweenInfo.new(4), {Position = UDim2.new(math.random(), 0, -0.2, 0), BackgroundTransparency = 1}):Play()
-    game:GetService("Debris"):AddItem(b, 4)
+    
+    TweenService:Create(b, TweenInfo.new(3.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(math.random(), 0, -0.1, 0), 
+        BackgroundTransparency = 1
+    }):Play()
+    game:GetService("Debris"):AddItem(b, 3.5)
 end
-task.spawn(function() while task.wait(0.6) do if MainFrame.Visible then CreateBubble() end end end)
+task.spawn(function() while task.wait(0.4) do if MainFrame.Visible then CreateBubble() end end end)
 
 --// [نظام سحب القائمة]
 local dragInput, dragStart, startPos
@@ -45,7 +61,7 @@ UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputT
 local TabContainer = Instance.new("ScrollingFrame", MainFrame); TabContainer.Size = UDim2.new(1, -20, 0, 40); TabContainer.Position = UDim2.fromOffset(10, 10); TabContainer.BackgroundTransparency = 1; TabContainer.CanvasSize = UDim2.new(0, 600, 0, 0); TabContainer.ScrollBarThickness = 0
 local ListLayout = Instance.new("UIListLayout", TabContainer); ListLayout.FillDirection = Enum.FillDirection.Horizontal; ListLayout.Padding = UDim.new(0, 8)
 
-local PageContainer = Instance.new("Frame", MainFrame); PageContainer.Size = UDim2.new(1, -20, 1, -120); PageContainer.Position = UDim2.fromOffset(10, 55); PageContainer.BackgroundTransparency = 1
+local PageContainer = Instance.new("Frame", MainFrame); PageContainer.Size = UDim2.new(1, -20, 1, -125); PageContainer.Position = UDim2.fromOffset(10, 55); PageContainer.BackgroundTransparency = 1
 
 local ActivePage = nil
 
@@ -68,15 +84,13 @@ function Vortex:CreateTab(Name)
     return Page
 end
 
---// [3. حل مشكلة تعارض الأزرار نهائياً]
+--// [3. نظام الأزرار]
 function Vortex:CreateToggle(Arg1, Arg2, Arg3)
     local TargetPage = type(Arg1) == "userdata" and Arg1 or ActivePage
     local Text = type(Arg1) == "string" and Arg1 or Arg2
     local Callback = type(Arg2) == "function" and Arg2 or Arg3
     
-    if not TargetPage then return end
-    
-    local T = Instance.new("TextButton", TargetPage); T.Text = Text; T.Size = UDim2.new(1, -10, 0, 35); T.BackgroundColor3 = Color3.fromRGB(40, 40, 50); T.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", T)
+    local T = Instance.new("TextButton", TargetPage); T.Text = Text; T.Size = UDim2.new(1, -10, 0, 35); T.BackgroundColor3 = Color3.fromRGB(40, 40, 50); T.TextColor3 = Color3.new(1,1,1); T.ZIndex = 2; Instance.new("UICorner", T)
     T.MouseButton1Click:Connect(function()
         TweenService:Create(T, TweenInfo.new(0.1), {Size = T.Size - UDim2.fromOffset(4, 4)}):Play()
         task.wait(0.1); TweenService:Create(T, TweenInfo.new(0.1), {Size = T.Size + UDim2.fromOffset(4, 4)}):Play()
@@ -85,7 +99,7 @@ function Vortex:CreateToggle(Arg1, Arg2, Arg3)
     return T
 end
 
---// [4. حل مشكلة تعارض السلايدر نهائياً]
+--// [4. نظام السلايدر المحسن والموزون]
 function Vortex:CreateSlider(Arg1, Arg2, Arg3, Arg4, Arg5)
     local TargetPage = type(Arg1) == "userdata" and Arg1 or ActivePage
     local Text = type(Arg1) == "string" and Arg1 or Arg2
@@ -93,11 +107,9 @@ function Vortex:CreateSlider(Arg1, Arg2, Arg3, Arg4, Arg5)
     local Max = type(Arg3) == "number" and Arg3 or Arg4
     local Callback = type(Arg4) == "function" and Arg4 or Arg5
     
-    if not TargetPage then return end
-    
-    local SliderBg = Instance.new("Frame", TargetPage); SliderBg.Size = UDim2.new(1, -10, 0, 40); SliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", SliderBg)
-    local Fill = Instance.new("Frame", SliderBg); Fill.Size = UDim2.new(0, 0, 1, 0); Fill.BackgroundColor3 = Color3.fromRGB(0, 140, 255); Instance.new("UICorner", Fill)
-    local Btn = Instance.new("TextButton", SliderBg); Btn.Size = UDim2.new(1, 0, 1, 0); Btn.BackgroundTransparency = 1; Btn.Text = Text .. " : " .. Min; Btn.TextColor3 = Color3.new(1,1,1)
+    local SliderBg = Instance.new("Frame", TargetPage); SliderBg.Size = UDim2.new(1, -10, 0, 40); SliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 35); SliderBg.ZIndex = 2; Instance.new("UICorner", SliderBg)
+    local Fill = Instance.new("Frame", SliderBg); Fill.Size = UDim2.new(0, 0, 1, 0); Fill.BackgroundColor3 = Color3.fromRGB(0, 140, 255); Fill.ZIndex = 2; Instance.new("UICorner", Fill)
+    local Btn = Instance.new("TextButton", SliderBg); Btn.Size = UDim2.new(1, 0, 1, 0); Btn.BackgroundTransparency = 1; Btn.Text = Text .. " : " .. Min; Btn.TextColor3 = Color3.new(1,1,1); Btn.ZIndex = 3
     
     Btn.MouseButton1Down:Connect(function()
         local con
@@ -114,7 +126,7 @@ function Vortex:CreateSlider(Arg1, Arg2, Arg3, Arg4, Arg5)
     return SliderBg
 end
 
---// [5. الزر العائم V - حركة ثقيلة ومحكومة]
+--// [5. الزر العائم V]
 local FloatBtn = Instance.new("TextButton", ScreenGui); FloatBtn.Size = UDim2.fromOffset(45, 45); FloatBtn.Position = UDim2.new(0.05, 0, 0.2, 0); FloatBtn.Text = "V"; FloatBtn.TextColor3 = Color3.new(1,1,1); FloatBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30); Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(1, 0)
 
 local function ToggleUI()
@@ -135,13 +147,21 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then fDragging = false end end)
 
---// [6. نظام الإعدادات الشخصية]
+--// [6. لوحة الحقوق الثابتة بالأسفل - تتغير حسب اللغة]
 Vortex.Lang = "AR"
-Vortex.Data = { Name = { ["AR"] = "عبدالله - علم العراق 🇮🇶", ["EN"] = "Abdullah - Iraq Flag 🇮🇶" }, Account = { ["AR"] = "حساب روبلوكس: eonsali07807863909", ["EN"] = "Roblox Account: eonsali07807863909" } }
+Vortex.Data = { 
+    Name = { ["AR"] = "المطور: عبدالله 🇮🇶", ["EN"] = "Dev: Abdullah 🇮🇶" }, 
+    Account = { ["AR"] = "الحساب: eonsali07807863909", ["EN"] = "Acc: eonsali07807863909" } 
+}
 
-local InfoFrame = Instance.new("Frame", MainFrame); InfoFrame.Size = UDim2.new(1, -20, 0, 50); InfoFrame.Position = UDim2.new(0, 10, 1, -55); InfoFrame.BackgroundTransparency = 1
-local NameLabel = Instance.new("TextLabel", InfoFrame); NameLabel.Size = UDim2.new(1, 0, 0, 20); NameLabel.TextColor3 = Color3.new(1,1,1); NameLabel.BackgroundTransparency = 1; NameLabel.TextXAlignment = Enum.TextXAlignment.Left
-local AccLabel = Instance.new("TextLabel", InfoFrame); AccLabel.Size = UDim2.new(1, 0, 0, 20); AccLabel.Position = UDim2.fromOffset(0, 22); AccLabel.TextColor3 = Color3.fromRGB(150, 150, 150); AccLabel.BackgroundTransparency = 1; AccLabel.TextXAlignment = Enum.TextXAlignment.Left
+local InfoFrame = Instance.new("Frame", MainFrame)
+InfoFrame.Size = UDim2.new(1, -20, 0, 50)
+InfoFrame.Position = UDim2.new(0, 10, 1, -55) -- ثابت في الأسفل تماماً
+InfoFrame.BackgroundTransparency = 1
+InfoFrame.ZIndex = 3
+
+local NameLabel = Instance.new("TextLabel", InfoFrame); NameLabel.Size = UDim2.new(1, 0, 0, 20); NameLabel.TextColor3 = Color3.fromRGB(0, 140, 255); NameLabel.BackgroundTransparency = 1; NameLabel.TextXAlignment = Enum.TextXAlignment.Left; NameLabel.Font = Enum.Font.GothamBold
+local AccLabel = Instance.new("TextLabel", InfoFrame); AccLabel.Size = UDim2.new(1, 0, 0, 20); AccLabel.Position = UDim2.fromOffset(0, 22); AccLabel.TextColor3 = Color3.fromRGB(180, 180, 180); AccLabel.BackgroundTransparency = 1; AccLabel.TextXAlignment = Enum.TextXAlignment.Left; AccLabel.Font = Enum.Font.Gotham
 
 function Vortex:UpdateLabels()
     NameLabel.Text = Vortex.Data.Name[Vortex.Lang]
