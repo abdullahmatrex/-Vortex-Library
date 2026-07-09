@@ -1,5 +1,5 @@
 --//==================================================================--
---        VORTEX CLEAN UI - MINIMALIST ACRYLIC ENGINE v13.5
+--        VORTEX CLEAN UI - FIX SCRIPT v13.6
 --        DEVELOPED BY: ABDULLAH MATREX (ALL RIGHTS RESERVED © 2026)
 --//==================================================================--
 
@@ -17,12 +17,12 @@ local UIS = game:GetService("UserInputService")
 --//==================================================================--
 local Sounds = {
 	Hover = Instance.new("Sound", SoundService),
-	Click = Instance.new("Sound", SoundService), -- صوت كيبورد ميكانيكي هادئ
+	Click = Instance.new("Sound", SoundService),
 	Success = Instance.new("Sound", SoundService)
 }
 
 Sounds.Hover.SoundId = "rbxassetid://9114223104"   Sounds.Hover.Volume = 0.3
-Sounds.Click.SoundId = "rbxassetid://7203304562"   Sounds.Click.Volume = 0.6 -- Mechanical Keyboard Style
+Sounds.Click.SoundId = "rbxassetid://7203304562"   Sounds.Click.Volume = 0.6
 Sounds.Success.SoundId = "rbxassetid://6895079853" Sounds.Success.Volume = 0.2
 
 --//==================================================================--
@@ -53,13 +53,12 @@ end
 
 --//==================================================================--
 -- Window Creator
---////==================================================================--
+--//==================================================================--
 function Vortex:CreateWindow(cfg)
 	cfg = cfg or {}
 	local Theme = cfg.Theme or Color3.fromRGB(0, 140, 255)
 	local ParticlesEnabled = true
 
-	-- تنظيف النسخ السابقة لتفادي الـ Lag
 	if CoreGui:FindFirstChild("VortexCleanUI") then CoreGui:FindFirstChild("VortexCleanUI"):Destroy() end
 	if Lighting:FindFirstChild("VortexBlur") then Lighting:FindFirstChild("VortexBlur"):Destroy() end
 
@@ -68,13 +67,11 @@ function Vortex:CreateWindow(cfg)
 	Gui.ResetOnSpawn = false
 	Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-	-- Blur Effect الخلفي الناعم
 	local Blur = Instance.new("BlurEffect", Lighting)
 	Blur.Name = "VortexBlur"
 	Blur.Size = 0
 	TweenService:Create(Blur, TweenInfo.new(.5, Enum.EasingStyle.QuadOut), {Size = 14}):Play()
 
-	-- [تصغير زر الفتح والإغلاق ليصبح هادئاً وأنيقاً]
 	local OpenButton = Instance.new("TextButton", Gui)
 	OpenButton.Size = UDim2.new(0,45,0,45)
 	OpenButton.Position = UDim2.new(.02, 0, .5, 0)
@@ -85,30 +82,68 @@ function Vortex:CreateWindow(cfg)
 	OpenButton.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 	OpenButton.AutoButtonColor = false
 	OpenButton.Active = true
-	OpenButton.Draggable = true
 	Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1,0)
 	local BtnStroke = Instance.new("UIStroke", OpenButton)
 	BtnStroke.Color = Theme
 	BtnStroke.Thickness = 1.5
 
-	-- Main UI Frame (تصميم شفاف مريح مع تأثير زجاجي Acrylic)
+	-- نظام سحب مخصص لزر الـ Open لتفادي أي مشاكل
+	local DraggingBtn, DragInputBtn, DragStartBtn, StartPosBtn
+	OpenButton.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			DraggingBtn = true
+			DragStartBtn = input.Position
+			StartPosBtn = OpenButton.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then DraggingBtn = false end
+			end)
+		end
+	end)
+	OpenButton.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then DragInputBtn = input end
+	end)
+	UIS.InputChanged:Connect(function(input)
+		if input == DragInputBtn and DraggingBtn then
+			local Delta = input.Position - DragStartBtn
+			OpenButton.Position = UDim2.new(StartPosBtn.X.Scale, StartPosBtn.X.Offset + Delta.X, StartPosBtn.Y.Scale, StartPosBtn.Y.Offset + Delta.Y)
+		end
+	end)
+
 	local Main = Instance.new("Frame", Gui)
 	Main.Size = UDim2.new(0,540,0,340)
 	Main.Position = UDim2.new(.5,-270,1.2,0)
 	Main.BackgroundColor3 = Color3.fromRGB(10, 11, 16)
-	Main.BackgroundTransparency = 0.25 -- شفافية مريحة جداً للعين
+	Main.BackgroundTransparency = 0.25
 	Main.BorderSizePixel = 0
 	Main.Active = true
-	Main.Draggable = true
 	Instance.new("UICorner", Main).CornerRadius = UDim.new(0,14)
 
 	local MainStroke = Instance.new("UIStroke", Main)
 	MainStroke.Color = Color3.fromRGB(45, 48, 60)
 	MainStroke.Thickness = 1
 
-	----------------------------------------------------
-	-- [محرك الدوائر الصاعدة من أسفل لأعلى بنعومة]
-	----------------------------------------------------
+	-- [تعديل السطر 75 وما بعده]: نظام سحب (Draggable) احترافي يدوي بدون مشاكل روبلوكس المدمجة لقائمة الماين
+	local Dragging, DragInput, DragStart, StartPos
+	Main.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			Dragging = true
+			DragStart = input.Position
+			StartPos = Main.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then Dragging = false end
+			end)
+		end
+	end)
+	Main.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then DragInput = input end
+	end)
+	UIS.InputChanged:Connect(function(input)
+		if input == DragInput and Dragging then
+			local Delta = input.Position - DragStart
+			Main.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+		end
+	end)
+
 	local ParticleHolder = Instance.new("Frame", Main)
 	ParticleHolder.Size = UDim2.new(1,0,1,0)
 	ParticleHolder.BackgroundTransparency = 1
@@ -118,15 +153,15 @@ function Vortex:CreateWindow(cfg)
 	local function CreateVerticalCircle()
 		if not ParticlesEnabled or not Main.Parent then return end
 		local Circle = Instance.new("Frame", ParticleHolder)
-		local Size = math.random(6, 16) -- دوائر مريحة
+		local Size = math.random(6, 16)
 		Circle.Size = UDim2.fromOffset(Size, Size)
-		Circle.Position = UDim2.new(math.random(0.05, 0.95), 0, 1.05, 0) -- تبدأ من الأسفل تماماً
+		Circle.Position = UDim2.new(math.random(0.05, 0.95), 0, 1.05, 0)
 		Circle.BackgroundColor3 = Theme
-		Circle.BackgroundTransparency = math.random(80, 92) / 100 -- خفيفة جداً شبه مخفية لراحة العين
+		Circle.BackgroundTransparency = math.random(80, 92) / 100
 		Instance.new("UICorner", Circle).CornerRadius = UDim.new(1,0)
 
 		local FloatTween = TweenService:Create(Circle, TweenInfo.new(math.random(5, 8), Enum.EasingStyle.QuadOut), {
-			Position = UDim2.new(Circle.Position.X.Scale, math.random(-20, 40), -0.1, 0), -- تصعد للأعلى
+			Position = UDim2.new(Circle.Position.X.Scale, math.random(-20, 40), -0.1, 0),
 			BackgroundTransparency = 1
 		})
 		FloatTween:Play()
@@ -136,11 +171,10 @@ function Vortex:CreateWindow(cfg)
 	task.spawn(function()
 		while Gui.Parent do
 			CreateVerticalCircle()
-			task.wait(0.35) -- توقيت هادئ غير مزعج
+			task.wait(0.35)
 		end
 	end)
 
-	-- TopBar & Clean Title System (الحقوق مثبتة بنقاء)
 	local Top = Instance.new("Frame", Main)
 	Top.Size = UDim2.new(1,0,0,45)
 	Top.BackgroundTransparency = 1
@@ -155,7 +189,6 @@ function Vortex:CreateWindow(cfg)
 	Title.TextColor3 = Color3.fromRGB(230, 235, 245)
 	Title.TextXAlignment = Enum.TextXAlignment.Left
 
-	-- [تصغير وتعديل زر الإغلاق X]
 	local CloseUIBtn = Instance.new("TextButton", Top)
 	CloseUIBtn.Size = UDim2.new(0,24,0,24)
 	CloseUIBtn.Position = UDim2.new(1,-36,0,10)
@@ -193,11 +226,9 @@ function Vortex:CreateWindow(cfg)
 	Pages.Size = UDim2.new(1,-32,1,-112)
 	Pages.BackgroundTransparency = 1
 
-	-- انيميشن الدخول الناعم والمريح
 	Main.Position = UDim2.new(.5,-270,1.2,0)
 	TweenService:Create(Main, TweenInfo.new(.5, Enum.EasingStyle.OutCubic), {Position = UDim2.new(.5,-270,.5,-170)}):Play()
 
-	-- نظام الفتح والإغلاق السلس عبر الزر الصغير
 	local IsUIOpen = true
 	OpenButton.MouseButton1Click:Connect(function()
 		IsUIOpen = not IsUIOpen
