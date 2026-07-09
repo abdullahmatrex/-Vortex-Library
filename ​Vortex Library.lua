@@ -1,5 +1,5 @@
 --//==================================================================--
---        VORTEX CLEAN UI - FINAL STABLE v13.7
+--        VORTEX CLEAN UI - BUG FIXED v13.8
 --        DEVELOPED BY: ABDULLAH MATREX (ALL RIGHTS RESERVED © 2026)
 --//==================================================================--
 
@@ -13,7 +13,7 @@ local SoundService = game:GetService("SoundService")
 local UIS = game:GetService("UserInputService")
 
 --//==================================================================--
--- [ سطر 9: إصلاح مراجع الأصوات لضمان عدم حدوث Nil Error ]
+-- [ إصلاح الأصوات بأكواد جديدة وشغالة ومطابقة للنوع ]
 --//==================================================================--
 local Sounds = {}
 local function CreateSafeSound(id, vol)
@@ -24,9 +24,10 @@ local function CreateSafeSound(id, vol)
 	return s
 end
 
-Sounds.Hover = CreateSafeSound("rbxassetid://9114223104", 0.3)
-Sounds.Click = CreateSafeSound("rbxassetid://7203304562", 0.6)
-Sounds.Success = CreateSafeSound("rbxassetid://6895079853", 0.2)
+-- أصوات نظامية متوافقة مع روبلوكس وخفيفة
+Sounds.Hover = CreateSafeSound("rbxassetid://6803061265", 0.3)
+Sounds.Click = CreateSafeSound("rbxassetid://8537617415", 0.5) -- صوت كليك كيبورد نظيف
+Sounds.Success = CreateSafeSound("rbxassetid://6454340531", 0.2)
 
 --//==================================================================--
 -- Ripple Effect Function
@@ -45,7 +46,8 @@ local function CreateRipple(Object)
 		Ripple.Size = UDim2.fromOffset(0,0)
 		Instance.new("UICorner",Ripple).CornerRadius = UDim.new(1,0)
 
-		TweenService:Create(Ripple, TweenInfo.new(0.4, Enum.EasingStyle.QuadOut), {
+		-- إصلاح الـ EasingStyle هنا إلى Quad
+		TweenService:Create(Ripple, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			Size = UDim2.fromOffset(Object.AbsoluteSize.X * 2, Object.AbsoluteSize.X * 2),
 			BackgroundTransparency = 1
 		}):Play()
@@ -73,7 +75,8 @@ function Vortex:CreateWindow(cfg)
 	local Blur = Instance.new("BlurEffect", Lighting)
 	Blur.Name = "VortexBlur"
 	Blur.Size = 0
-	TweenService:Create(Blur, TweenInfo.new(.5, Enum.EasingStyle.QuadOut), {Size = 14}):Play()
+	-- تصحيح الـ EasingStyle هنا أيضاً
+	TweenService:Create(Blur, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 14}):Play()
 
 	local OpenButton = Instance.new("TextButton", Gui)
 	OpenButton.Size = UDim2.new(0,45,0,45)
@@ -90,7 +93,6 @@ function Vortex:CreateWindow(cfg)
 	BtnStroke.Color = Theme
 	BtnStroke.Thickness = 1.5
 
-	-- نظام سحب مستقل وآمن لزر الـ Open
 	local dragToggleBtn, dragStartBtn, startPosBtn
 	OpenButton.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -124,11 +126,10 @@ function Vortex:CreateWindow(cfg)
 	MainStroke.Color = Color3.fromRGB(45, 48, 60)
 	MainStroke.Thickness = 1
 
-	-- [سطر 75: نظام سحب يدوي محمي ومعزول تماماً ومستقر]
 	local dragToggle, dragStart, startPos
 	Main.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			if input.Position.Y - Main.AbsolutePosition.Y <= 45 then -- السحب متاح فقط من التوب بار لعدم تداخل الأزرار
+			if input.Position.Y - Main.AbsolutePosition.Y <= 45 then
 				dragToggle = true
 				dragStart = input.Position
 				startPos = Main.Position
@@ -163,7 +164,8 @@ function Vortex:CreateWindow(cfg)
 		Circle.BackgroundTransparency = math.random(80, 92) / 100
 		Instance.new("UICorner", Circle).CornerRadius = UDim.new(1,0)
 
-		local FloatTween = TweenService:Create(Circle, TweenInfo.new(math.random(5, 8), Enum.EasingStyle.QuadOut), {
+		-- تصحيح الـ EasingStyle هنا أيضاً للدوائر الصاعدة
+		local FloatTween = TweenService:Create(Circle, TweenInfo.new(math.random(5, 8), Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			Position = UDim2.new(Circle.Position.X.Scale, math.random(-20, 40), -0.1, 0),
 			BackgroundTransparency = 1
 		})
@@ -209,7 +211,7 @@ function Vortex:CreateWindow(cfg)
 
 	CloseUIBtn.MouseButton1Click:Connect(function()
 		if Sounds.Click then Sounds.Click:Play() end
-		TweenService:Create(Main, TweenInfo.new(.35, Enum.EasingStyle.QuadIn), {Position = UDim2.new(.5,-270,1.2,0), BackgroundTransparency = 1}):Play()
+		TweenService:Create(Main, TweenInfo.new(.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(.5,-270,1.2,0), BackgroundTransparency = 1}):Play()
 		TweenService:Create(Blur, TweenInfo.new(.3), {Size = 0}):Play()
 		task.wait(.35)
 		Gui:Destroy()
@@ -230,7 +232,7 @@ function Vortex:CreateWindow(cfg)
 	Pages.BackgroundTransparency = 1
 
 	Main.Position = UDim2.new(.5,-270,1.2,0)
-	TweenService:Create(Main, TweenInfo.new(.5, Enum.EasingStyle.OutCubic), {Position = UDim2.new(.5,-270,.5,-170)}):Play()
+	TweenService:Create(Main, TweenInfo.new(.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(.5,-270,.5,-170)}):Play()
 
 	local IsUIOpen = true
 	OpenButton.MouseButton1Click:Connect(function()
@@ -238,10 +240,10 @@ function Vortex:CreateWindow(cfg)
 		if Sounds.Click then Sounds.Click:Play() end
 		if IsUIOpen then
 			Main.Visible = true
-			TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.OutCubic), {Position = UDim2.new(.5,-270,.5,-170)}):Play()
+			TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(.5,-270,.5,-170)}):Play()
 			TweenService:Create(Blur, TweenInfo.new(.4), {Size = 14}):Play()
 		else
-			local CloseTween = TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.InCubic), {Position = UDim2.new(.5,-270,1.2,0)})
+			local CloseTween = TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(.5,-270,1.2,0)})
 			CloseTween:Play()
 			TweenService:Create(Blur, TweenInfo.new(.4), {Size = 0}):Play()
 			CloseTween.Completed:Connect(function() if not IsUIOpen then Main.Visible = false end end)
@@ -370,8 +372,8 @@ function Vortex:CreateWindow(cfg)
 			Instance.new("UICorner", Circle).CornerRadius = UDim.new(1,0)
 
 			local function Refresh()
-				TweenService:Create(Toggle, TweenInfo.new(.2), {BackgroundColor3 = Enabled and Theme or Color3.fromRGB(30,32,40)}):Play()
-				TweenService:Create(Circle, TweenInfo.new(.2), {Position = Enabled and UDim2.new(1,-16,.5,-7) or UDim2.new(0,2,.5,-7)}):Play()
+				TweenService:Create(Toggle, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Enabled and Theme or Color3.fromRGB(30,32,40)}):Play()
+				TweenService:Create(Circle, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = Enabled and UDim2.new(1,-16,.5,-7) or UDim2.new(0,2,.5,-7)}):Play()
 				if Callback then task.spawn(function() Callback(Enabled) end) end
 			end
 
@@ -476,7 +478,7 @@ function Vortex:CreateWindow(cfg)
 			Btn.MouseButton1Click:Connect(function()
 				if Sounds.Click then Sounds.Click:Play() end
 				Open = not Open
-				TweenService:Create(Holder, TweenInfo.new(.2, Enum.EasingStyle.Quart), {Size = Open and UDim2.new(1,-4,0,42 + (#List * 32)) or UDim2.new(1,-4,0,38)}):Play()
+				TweenService:Create(Holder, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Open and UDim2.new(1,-4,0,42 + (#List * 32)) or UDim2.new(1,-4,0,38)}):Play()
 				HStroke.Color = Open and Theme or Color3.fromRGB(32,35,45)
 			end)
 
@@ -492,7 +494,7 @@ function Vortex:CreateWindow(cfg)
 					if Sounds.Click then Sounds.Click:Play() end
 					Btn.Text = "   " .. Text .. " : " .. tostring(v)
 					Open = false
-					TweenService:Create(Holder, TweenInfo.new(.2, Enum.EasingStyle.Quart), {Size = UDim2.new(1,-4,0,38)}):Play()
+					TweenService:Create(Holder, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1,-4,0,38)}):Play()
 					HStroke.Color = Color3.fromRGB(32,35,45)
 					if Callback then Callback(v) end
 				end)
