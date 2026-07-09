@@ -1,5 +1,5 @@
 --//==================================================================--
---        VORTEX CLEAN UI - FIX SCRIPT v13.6
+--        VORTEX CLEAN UI - FINAL STABLE v13.7
 --        DEVELOPED BY: ABDULLAH MATREX (ALL RIGHTS RESERVED © 2026)
 --//==================================================================--
 
@@ -13,17 +13,20 @@ local SoundService = game:GetService("SoundService")
 local UIS = game:GetService("UserInputService")
 
 --//==================================================================--
--- [ مكتبة الأصوات المحدثة - صوت كيبورد خفيف ومريح ]
+-- [ سطر 9: إصلاح مراجع الأصوات لضمان عدم حدوث Nil Error ]
 --//==================================================================--
-local Sounds = {
-	Hover = Instance.new("Sound", SoundService),
-	Click = Instance.new("Sound", SoundService),
-	Success = Instance.new("Sound", SoundService)
-}
+local Sounds = {}
+local function CreateSafeSound(id, vol)
+	local s = Instance.new("Sound")
+	s.SoundId = id
+	s.Volume = vol
+	s.Parent = SoundService
+	return s
+end
 
-Sounds.Hover.SoundId = "rbxassetid://9114223104"   Sounds.Hover.Volume = 0.3
-Sounds.Click.SoundId = "rbxassetid://7203304562"   Sounds.Click.Volume = 0.6
-Sounds.Success.SoundId = "rbxassetid://6895079853" Sounds.Success.Volume = 0.2
+Sounds.Hover = CreateSafeSound("rbxassetid://9114223104", 0.3)
+Sounds.Click = CreateSafeSound("rbxassetid://7203304562", 0.6)
+Sounds.Success = CreateSafeSound("rbxassetid://6895079853", 0.2)
 
 --//==================================================================--
 -- Ripple Effect Function
@@ -87,25 +90,24 @@ function Vortex:CreateWindow(cfg)
 	BtnStroke.Color = Theme
 	BtnStroke.Thickness = 1.5
 
-	-- نظام سحب مخصص لزر الـ Open لتفادي أي مشاكل
-	local DraggingBtn, DragInputBtn, DragStartBtn, StartPosBtn
+	-- نظام سحب مستقل وآمن لزر الـ Open
+	local dragToggleBtn, dragStartBtn, startPosBtn
 	OpenButton.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			DraggingBtn = true
-			DragStartBtn = input.Position
-			StartPosBtn = OpenButton.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then DraggingBtn = false end
-			end)
+			dragToggleBtn = true
+			dragStartBtn = input.Position
+			startPosBtn = OpenButton.Position
 		end
 	end)
-	OpenButton.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then DragInputBtn = input end
-	end)
 	UIS.InputChanged:Connect(function(input)
-		if input == DragInputBtn and DraggingBtn then
-			local Delta = input.Position - DragStartBtn
-			OpenButton.Position = UDim2.new(StartPosBtn.X.Scale, StartPosBtn.X.Offset + Delta.X, StartPosBtn.Y.Scale, StartPosBtn.Y.Offset + Delta.Y)
+		if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggleBtn then
+			local delta = input.Position - dragStartBtn
+			OpenButton.Position = UDim2.new(startPosBtn.X.Scale, startPosBtn.X.Offset + delta.X, startPosBtn.Y.Scale, startPosBtn.Y.Offset + delta.Y)
+		end
+	end)
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragToggleBtn = false
 		end
 	end)
 
@@ -122,25 +124,26 @@ function Vortex:CreateWindow(cfg)
 	MainStroke.Color = Color3.fromRGB(45, 48, 60)
 	MainStroke.Thickness = 1
 
-	-- [تعديل السطر 75 وما بعده]: نظام سحب (Draggable) احترافي يدوي بدون مشاكل روبلوكس المدمجة لقائمة الماين
-	local Dragging, DragInput, DragStart, StartPos
+	-- [سطر 75: نظام سحب يدوي محمي ومعزول تماماً ومستقر]
+	local dragToggle, dragStart, startPos
 	Main.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			Dragging = true
-			DragStart = input.Position
-			StartPos = Main.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then Dragging = false end
-			end)
+			if input.Position.Y - Main.AbsolutePosition.Y <= 45 then -- السحب متاح فقط من التوب بار لعدم تداخل الأزرار
+				dragToggle = true
+				dragStart = input.Position
+				startPos = Main.Position
+			end
 		end
 	end)
-	Main.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then DragInput = input end
-	end)
 	UIS.InputChanged:Connect(function(input)
-		if input == DragInput and Dragging then
-			local Delta = input.Position - DragStart
-			Main.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+		if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggle then
+			local delta = input.Position - dragStart
+			Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragToggle = false
 		end
 	end)
 
@@ -205,7 +208,7 @@ function Vortex:CreateWindow(cfg)
 	CloseUIBtn.MouseLeave:Connect(function() CloseUIBtn.TextColor3 = Color3.fromRGB(180, 185, 195) end)
 
 	CloseUIBtn.MouseButton1Click:Connect(function()
-		Sounds.Click:Play()
+		if Sounds.Click then Sounds.Click:Play() end
 		TweenService:Create(Main, TweenInfo.new(.35, Enum.EasingStyle.QuadIn), {Position = UDim2.new(.5,-270,1.2,0), BackgroundTransparency = 1}):Play()
 		TweenService:Create(Blur, TweenInfo.new(.3), {Size = 0}):Play()
 		task.wait(.35)
@@ -232,7 +235,7 @@ function Vortex:CreateWindow(cfg)
 	local IsUIOpen = true
 	OpenButton.MouseButton1Click:Connect(function()
 		IsUIOpen = not IsUIOpen
-		Sounds.Click:Play()
+		if Sounds.Click then Sounds.Click:Play() end
 		if IsUIOpen then
 			Main.Visible = true
 			TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.OutCubic), {Position = UDim2.new(.5,-270,.5,-170)}):Play()
@@ -292,7 +295,7 @@ function Vortex:CreateWindow(cfg)
 		end)
 
 		Button.MouseButton1Click:Connect(function()
-			Sounds.Click:Play()
+			if Sounds.Click then Sounds.Click:Play() end
 			for _,v in ipairs(self.Pages:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
 			for _,v in ipairs(self.TabBar:GetChildren()) do
 				if v:IsA("TextButton") then
@@ -335,7 +338,7 @@ function Vortex:CreateWindow(cfg)
 			Btn.MouseLeave:Connect(function() TweenService:Create(Stroke, TweenInfo.new(.15), {Color = Color3.fromRGB(32,35,45)}):Play() end)
 			
 			Btn.MouseButton1Click:Connect(function()
-				Sounds.Click:Play()
+				if Sounds.Click then Sounds.Click:Play() end
 				if Callback then task.spawn(Callback) end
 			end)
 		end
@@ -374,7 +377,7 @@ function Vortex:CreateWindow(cfg)
 
 			Holder.InputBegan:Connect(function(Input)
 				if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-					Sounds.Click:Play()
+					if Sounds.Click then Sounds.Click:Play() end
 					Enabled = not Enabled
 					Refresh()
 				end
@@ -415,7 +418,11 @@ function Vortex:CreateWindow(cfg)
 			Label.Text = Text .. " : " .. Value
 
 			Bar.InputBegan:Connect(function(i)
-				if i.UserInputType == Enum.UserInputType.MouseButton1 then Drag = true; Sounds.Click:Play(); Update(i.Position.X) end
+				if i.UserInputType == Enum.UserInputType.MouseButton1 then 
+					Drag = true
+					if Sounds.Click then Sounds.Click:Play() end
+					Update(i.Position.X) 
+				end
 			end)
 			UIS.InputChanged:Connect(function(i)
 				if Drag and i.UserInputType == Enum.UserInputType.MouseMovement then Update(i.Position.X) end
@@ -440,7 +447,7 @@ function Vortex:CreateWindow(cfg)
 			Instance.new("UIStroke", Box).Color = Color3.fromRGB(32,35,45)
 
 			Box.FocusLost:Connect(function()
-				Sounds.Click:Play()
+				if Sounds.Click then Sounds.Click:Play() end
 				if Callback then Callback(Box.Text) end
 			end)
 		end
@@ -467,7 +474,7 @@ function Vortex:CreateWindow(cfg)
 			Instance.new("UIListLayout", OContainer).Padding = UDim.new(0,4)
 
 			Btn.MouseButton1Click:Connect(function()
-				Sounds.Click:Play()
+				if Sounds.Click then Sounds.Click:Play() end
 				Open = not Open
 				TweenService:Create(Holder, TweenInfo.new(.2, Enum.EasingStyle.Quart), {Size = Open and UDim2.new(1,-4,0,42 + (#List * 32)) or UDim2.new(1,-4,0,38)}):Play()
 				HStroke.Color = Open and Theme or Color3.fromRGB(32,35,45)
@@ -482,7 +489,7 @@ function Vortex:CreateWindow(cfg)
 				Instance.new("UICorner", Op).CornerRadius = UDim.new(0,6)
 
 				Op.MouseButton1Click:Connect(function()
-					Sounds.Click:Play()
+					if Sounds.Click then Sounds.Click:Play() end
 					Btn.Text = "   " .. Text .. " : " .. tostring(v)
 					Open = false
 					TweenService:Create(Holder, TweenInfo.new(.2, Enum.EasingStyle.Quart), {Size = UDim2.new(1,-4,0,38)}):Play()
