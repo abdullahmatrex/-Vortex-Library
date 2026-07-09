@@ -1,5 +1,5 @@
 --//==================================================================--
---        VORTEX CLEAN UI - FIX MASTER v15.5 (ULTIMATE VISIBILITY)
+--        VORTEX CLEAN UI - WEIGHTED BUTTON v15.8 (SMOOTH DRAG)
 --        DEVELOPED BY: ABDULLAH MATREX (ALL RIGHTS RESERVED © 2026)
 --//==================================================================--
 
@@ -33,16 +33,15 @@ local Localization = {
 	}
 }
 
--- تنظيف النسخ القديمة لضمان عدم التداخل نهائياً
 if CoreGui:FindFirstChild("VortexCleanUI") then CoreGui:FindFirstChild("VortexCleanUI"):Destroy() end
 if Lighting:FindFirstChild("VortexBlur") then Lighting:FindFirstChild("VortexBlur"):Destroy() end
 
 local Gui = Instance.new("ScreenGui", CoreGui)
 Gui.Name = "VortexCleanUI"
 Gui.ResetOnSpawn = false
-Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global -- تم التعديل لمنع اختفاء الأزرار خلف الخلفية
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
---// 1. شاشة اختيار اللغة الحتمية
+--// 1. شاشة اختيار اللغة
 local LangFrame = Instance.new("Frame", Gui)
 LangFrame.Size = UDim2.new(0, 340, 0, 180)
 LangFrame.Position = UDim2.new(0.5, -170, 0.5, -90)
@@ -123,12 +122,12 @@ Blur.Name = "VortexBlur"
 Blur.Size = 0
 TweenService:Create(Blur, TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 12}):Play()
 
---// 3. بناء هيكل الواجهة والميثودز المصلحة
+--// 3. بناء هيكل الواجهة
 function Vortex:CreateWindow(cfg)
 	cfg = cfg or {}
 	local Theme = cfg.Theme or Color3.fromRGB(0, 140, 255)
 
-	-- الزر العائم V المصلح
+	-- الزر العائم V
 	local OpenButton = Instance.new("TextButton", Gui)
 	OpenButton.Size = UDim2.new(0, 50, 0, 50)
 	OpenButton.Position = UDim2.new(0.03, 0, 0.45, 0)
@@ -143,26 +142,47 @@ function Vortex:CreateWindow(cfg)
 	BtnStroke.Color = Theme
 	BtnStroke.Thickness = 2
 
-	-- سحب مستقر وسلس للزر العائم
-	local dragToggleBtn, dragStartBtn, startPosBtn
+	-- 🔥 نظام سحب ثقيل متوسط ناعم (Weighted Smooth Dragging)
+	local draggingBtn = false
+	local dragInputBtn
+	local dragStartBtn
+	local startPosBtn
+
+	local function updateBtn(input)
+		local delta = input.Position - dragStartBtn
+		local targetPos = UDim2.new(startPosBtn.X.Scale, startPosBtn.X.Offset + delta.X, startPosBtn.Y.Scale, startPosBtn.Y.Offset + delta.Y)
+		
+		-- تم استخدام ثقل متوسط (0.15 ثانية) لجعل الزر ثقيل ومريح أثناء السحب
+		TweenService:Create(OpenButton, TweenInfo.new(0.15, Enum.EasingStyle.OutQuad), {Position = targetPos}):Play()
+	end
+
 	OpenButton.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragToggleBtn = true
+			draggingBtn = true
 			dragStartBtn = input.Position
 			startPosBtn = OpenButton.Position
+			
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					draggingBtn = false
+				end
+			end)
 		end
-	end)
-	UIS.InputChanged:Connect(function(input)
-		if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggleBtn then
-			local delta = input.Position - dragStartBtn
-			OpenButton.Position = UDim2.new(startPosBtn.X.Scale, startPosBtn.X.Offset + delta.X, startPosBtn.Y.Scale, startPosBtn.Y.Offset + delta.Y)
-		end
-	end)
-	UIS.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggleBtn = false end
 	end)
 
-	-- حدود وتصميم القائمة الرئيسية (تم توضيح الحدود وإعطائها سمك ووضوح)
+	OpenButton.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInputBtn = input
+		end
+	end)
+
+	UIS.InputChanged:Connect(function(input)
+		if input == dragInputBtn and draggingBtn then
+			updateBtn(input)
+		end
+	end)
+
+	-- القائمة الرئيسية وباقي الأكواد المستقرة
 	local Main = Instance.new("Frame", Gui)
 	Main.Size = UDim2.new(0, 540, 0, 360)
 	Main.Position = UDim2.new(0.5, -270, 1.2, 0)
@@ -172,13 +192,12 @@ function Vortex:CreateWindow(cfg)
 	Main.ZIndex = 2
 	Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 	
-	-- حد القائمة الفخم والواضح جداً (Border)
 	local MainStroke = Instance.new("UIStroke", Main)
 	MainStroke.Color = Theme
 	MainStroke.Thickness = 2
 	MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-	-- سحب مستقر للوحة
+	-- سحب سريع وعادي للوحة التحكم الرئيسية
 	local dragToggle, dragStart, startPos
 	Main.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -307,7 +326,6 @@ function Vortex:CreateWindow(cfg)
 
 	local WindowMethods = {Gui = Gui, Main = Main, Theme = Theme, Pages = Pages, TabBar = TabBar, TabsCount = 0}
 
-	--// 4. ميثود إنشاء التبويبات مع إصلاح نظام الظهور الـ ZIndex الحتمي للأزرار
 	function WindowMethods:CreateTab(Name)
 		self.TabsCount = self.TabsCount + 1
 		local Page = Instance.new("ScrollingFrame", self.Pages)
@@ -318,7 +336,7 @@ function Vortex:CreateWindow(cfg)
 		Page.Visible = false
 		Page.BackgroundTransparency = 1
 		Page.BorderSizePixel = 0
-		Page.ClipsDescendants = true -- غصب يقص العناصر وما يخفيها
+		Page.ClipsDescendants = true
 		Page.ZIndex = 4
 		
 		local List = Instance.new("UIListLayout", Page)
@@ -361,7 +379,6 @@ function Vortex:CreateWindow(cfg)
 
 		local TabMethods = {Page = Page, Theme = Theme}
 
-		-- إضافة الأزرار العادية المصلحة بالكامل لضمان ظهورها
 		function TabMethods:AddButton(Text, Callback)
 			local Btn = Instance.new("TextButton", self.Page)
 			Btn.Size = UDim2.new(1, -6, 0, 40)
@@ -379,7 +396,6 @@ function Vortex:CreateWindow(cfg)
 			Btn.MouseButton1Click:Connect(function() if Callback then Callback() end end)
 		end
 
-		-- إضافة التوجلز المصلحة مع ZIndex حتمي للاستجابة والظهور
 		function TabMethods:AddToggle(Text, Default, Callback)
 			local Enabled = Default or false
 			local Holder = Instance.new("Frame", self.Page)
@@ -419,7 +435,6 @@ function Vortex:CreateWindow(cfg)
 			Toggle.MouseButton1Click:Connect(function() Enabled = not Enabled Refresh() end)
 		end
 
-		-- إضافة السلايدرات الفخمة والعريضة جداً مع ZIndex حتمي لسهولة السحب واللمس
 		function TabMethods:AddSlider(Text, Min, Max, Default, Callback)
 			local Value = Default or Min
 			local Holder = Instance.new("Frame", self.Page)
@@ -472,7 +487,6 @@ function Vortex:CreateWindow(cfg)
 		return TabMethods
 	end
 
-	-- إنشاء تبويب المطور التلقائي الحتمي بعد تعديل الـ ZIndex
 	local ForcedTab = WindowMethods:CreateTab(Localization[Vortex.Language].owner)
 	local OwnerFrame = Instance.new("Frame", ForcedTab.Page)
 	OwnerFrame.Size = UDim2.new(1, -6, 0, 85)
