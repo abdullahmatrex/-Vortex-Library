@@ -1,38 +1,15 @@
---// VORTEX GOLDEN EDITION - PERFECTED PERFORMANCE
+--// VORTEX GOLDEN EDITION - INSTANT & PERFECTED
 local Vortex = {}
 local UIS, TweenService, RunService = game:GetService("UserInputService"), game:GetService("TweenService"), game:GetService("RunService")
 local Blur = Instance.new("BlurEffect", game.Lighting); Blur.Size = 0
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 
---// [1. نظام تحميل فخم مع وقت ممتد لرؤية الاسم]
-local LoadingFrame = Instance.new("Frame", ScreenGui)
-LoadingFrame.Size = UDim2.fromScale(1, 1); LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12); LoadingFrame.ZIndex = 10
-local LoadingText = Instance.new("TextLabel", LoadingFrame)
-LoadingText.Size = UDim2.fromScale(1, 1); LoadingText.Text = ""; LoadingText.TextColor3 = Color3.fromRGB(0, 140, 255); LoadingText.Font = Enum.Font.GothamBold; LoadingText.TextSize = 28; LoadingText.BackgroundTransparency = 1; LoadingText.ZIndex = 11
-
-task.spawn(function()
-    Blur.Size = 25
-    local fullText = "VORTEX OMNI"
-    -- ظهور الحروف
-    for i = 1, #fullText do
-        LoadingText.Text = string.sub(fullText, 1, i)
-        task.wait(0.12)
-    end
-    task.wait(1.5) -- وقت إضافي كافٍ لكي تلحق تقرأ الاسم وتستمتع به
-    
-    TweenService:Create(LoadingFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(LoadingText, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-    task.wait(0.6)
-    LoadingFrame:Destroy()
-    Blur.Size = 0
-end)
-
---// [2. القائمة الرئيسية - تصغير الارتفاع وتثبيت السنتر]
+--// [1. القائمة الرئيسية - تمركز سنتر مطلق ومضمون]
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.fromOffset(440, 290) -- تم تصغير الارتفاع لتكون ملمومة ومنسقة
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.Position = UDim2.fromScale(0.5, 0.5) 
+MainFrame.Size = UDim2.fromOffset(440, 280)
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- قفل التمركز في المنتصف
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0) -- منتصف الشاشة تماماً 100%
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.BackgroundTransparency = 0.15
 MainFrame.Visible = false
@@ -47,10 +24,10 @@ FrameStroke.Color = Color3.fromRGB(0, 140, 255)
 FrameStroke.Thickness = 1.8
 FrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
---// [نظام الفقاعات المحسن - أكبر وأكثر كثافة]
+--// [نظام الفقاعات الكثيفة والكبيرة]
 local function CreateBubble()
     local b = Instance.new("Frame", MainFrame)
-    local size = math.random(10, 16) -- فقاعات أكبر حجماً
+    local size = math.random(10, 16)
     b.Size = UDim2.fromOffset(size, size)
     b.Position = UDim2.new(math.random(), 0, 1.1, 0)
     b.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
@@ -64,7 +41,6 @@ local function CreateBubble()
     }):Play()
     game:GetService("Debris"):AddItem(b, 3)
 end
--- زيادة التوليد بكثافة أعلى
 task.spawn(function() while task.wait(0.25) do if MainFrame.Visible then CreateBubble() end end end)
 
 --// [نظام سحب القائمة]
@@ -100,7 +76,7 @@ function Vortex:CreateTab(Name)
     return Page
 end
 
---// [3. نظام الأزرار]
+--// [2. نظام الأزرار]
 function Vortex:CreateToggle(Arg1, Arg2, Arg3)
     local TargetPage = type(Arg1) == "userdata" and Arg1 or ActivePage
     local Text = type(Arg1) == "string" and Arg1 or Arg2
@@ -115,7 +91,7 @@ function Vortex:CreateToggle(Arg1, Arg2, Arg3)
     return T
 end
 
---// [4. نظام السلايدر المحمي والمقيد بلمس السلايدر نفسه فقط]
+--// [3. قفل السلايدر الحصري - مستحيل يتحرك بالخطأ]
 function Vortex:CreateSlider(Arg1, Arg2, Arg3, Arg4, Arg5)
     local TargetPage = type(Arg1) == "userdata" and Arg1 or ActivePage
     local Text = type(Arg1) == "string" and Arg1 or Arg2
@@ -127,14 +103,17 @@ function Vortex:CreateSlider(Arg1, Arg2, Arg3, Arg4, Arg5)
     local Fill = Instance.new("Frame", SliderBg); Fill.Size = UDim2.new(0, 0, 1, 0); Fill.BackgroundColor3 = Color3.fromRGB(0, 140, 255); Fill.ZIndex = 5; Instance.new("UICorner", Fill)
     local Btn = Instance.new("TextButton", SliderBg); Btn.Size = UDim2.new(1, 0, 1, 0); Btn.BackgroundTransparency = 1; Btn.Text = Text .. " : " .. Min; Btn.TextColor3 = Color3.new(1,1,1); Btn.ZIndex = 6
     
-    local isSliding = false -- مفتاح الأمان لمنع الحركة العشوائية
+    local allowedToMove = false
     
-    Btn.MouseButton1Down:Connect(function()
-        isSliding = true
+    -- لن يبدأ بالتحرك إلا إذا بدأت اللمسة داخل الزر نفسه
+    Btn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            allowedToMove = true
+        end
     end)
     
-    local moveCon = UIS.InputChanged:Connect(function(input)
-        if isSliding and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    UIS.InputChanged:Connect(function(input)
+        if allowedToMove and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local mouseX = input.Position.X - SliderBg.AbsolutePosition.X
             local perc = math.clamp(mouseX / SliderBg.AbsoluteSize.X, 0, 1)
             Fill.Size = UDim2.new(perc, 0, 1, 0)
@@ -144,16 +123,16 @@ function Vortex:CreateSlider(Arg1, Arg2, Arg3, Arg4, Arg5)
         end
     end)
     
-    local endCon = UIS.InputEnded:Connect(function(input)
+    UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isSliding = false
+            allowedToMove = false
         end
     end)
     
     return SliderBg
 end
 
---// [5. الزر العائم V الثقيل والمنسق]
+--// [4. الزر العائم V الثقيل والمنسق]
 local FloatBtn = Instance.new("TextButton", ScreenGui); FloatBtn.Size = UDim2.fromOffset(42, 42); FloatBtn.Position = UDim2.new(0.05, 0, 0.2, 0); FloatBtn.Text = "V"; FloatBtn.TextColor3 = Color3.new(1,1,1); FloatBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 30); Instance.new("UICorner", FloatBtn).CornerRadius = UDim.new(1, 0)
 
 local function ToggleUI()
@@ -174,7 +153,7 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then fDragging = false end end)
 
---// [6. لوحة الحقوق الثابتة والمعدلة]
+--// [5. لوحة الحقوق الثابتة بالأسفل]
 Vortex.Lang = "AR"
 Vortex.Data = { 
     Name = { ["AR"] = "المطور: عبدالله 🇮🇶", ["EN"] = "Dev: Abdullah 🇮🇶" }, 
