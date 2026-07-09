@@ -64,3 +64,17 @@ function Vortex:CreateSlider(Parent, Text, Min, Max, Callback)
 end
 
 return Vortex
+local Vortex = loadstring(game:HttpGet("https://raw.githubusercontent.com/abdullahmatrex/-Vortex-Library/main/%E2%80%8BVortex%20Library.lua"))()
+
+-- إنشاء التبويبات
+local MainTab = Vortex:CreateTab("Main")
+local CombatTab = Vortex:CreateTab("Combat")
+
+-- الآن يشتغل 100% بدون خطأ السطر 10
+Vortex:CreateToggle(MainTab, "Speed Hack Test", function()
+    print("Speed Hack Toggled Successfully!")
+end)
+
+Vortex:CreateSlider(CombatTab, "Aim FoV", 10, 300, function(value)
+    print("FoV Size: " .. value)
+end)
