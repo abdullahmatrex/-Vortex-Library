@@ -1,525 +1,404 @@
 --//==================================================================--
---        VORTEX CLEAN UI - WEIGHTED BUTTON v15.8 (SMOOTH DRAG)
---        DEVELOPED BY: ABDULLAH MATREX (ALL RIGHTS RESERVED © 2026)
+--        VORTEX PRESTIGE FRAMEWORK - ULTRA MASTER OMNI SUITE v350.0
+--        DESIGNED & ENGINEERED BY: ABDULLAH ALI (© ALL RIGHTS RESERVED 2026)
 --//==================================================================--
 
 local Vortex = {}
 Vortex.__index = Vortex
 
+--// [إعداد الجداول والبيانات الأساسية للمحرك]
+Vortex.Info = { Name = "Vortex Prestige UI", Version = "350.0.0", Developer = "Abdullah Ali" }
+Vortex.Name = Vortex.Info.Name
+Vortex.Version = Vortex.Info.Version
+Vortex.SelectedLanguage = "EN" -- الافتراضي
+
+Vortex.About = {}
+Vortex.Plugin = { PluginsList = {} }
+Vortex.Safe = {}
+Vortex.Effects = {}
+Vortex.Glass = {}
+Vortex.Responsive = { ScaleFactor = 1, MobileMode = false }
+Vortex.Window = { State = "Normal" }
+Vortex.Notification = { ActiveNotifs = {} }
+Vortex.Logger = { Logs = {} }
+Vortex.Performance = { StartTime = os.time() }
+Vortex.Sidebar = { Items = {}, IsOpen = false }
+Vortex.Search = { Database = {} }
+Vortex.ConfigSystem = { CurrentProfile = "Default", Config = {} }
+Vortex.Theme = { ThemesList = {}, ActiveTheme = "Neon", ColorMap = {} }
+Vortex.Animation = { Speed = 0.3, Enabled = true, CurrentStyle = "ZoomFade" }
+Vortex.Pages = {}
+Vortex.Button = {}
+
+--// [استدعاء خدمات روبلوكس الأساسية]
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 
-Vortex.Language = "en"
-local Localization = {
-	ar = {
-		loading = "جاري فحص وتحميل محرك فورتكس...",
-		owner = "المطور الإجباري",
-		name = "الاسم: عبدالله ماتريكس",
-		user = "حساب روبلوكس: eonsali07807863909",
-		close_confirm = "هل أنت متأكد من إغلاق القائمة؟",
-		yes = "نعم", no = "لا",
-		select_lang = "اختر لغة الواجهة / Select UI Language"
-	},
-	en = {
-		loading = "Scanning & Loading Vortex Engine...",
-		owner = "Forced Developer",
-		name = "Name: Abdullah Matrex",
-		user = "Roblox User: eonsali07807863909",
-		close_confirm = "Are you sure you want to close?",
-		yes = "Yes", no = "No",
-		select_lang = "اختر لغة الواجهة / Select UI Language"
-	}
+local Player = Players.LocalPlayer
+
+--// [تنظيف أي واجهات سابقة لمنع التكرار]
+if CoreGui:FindFirstChild("VortexPrestigeUI") then 
+	CoreGui:FindFirstChild("VortexPrestigeUI"):Destroy() 
+end
+
+--// [إنشاء لوحة الرسم الرئيسية]
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "VortexPrestigeUI"
+ScreenGui.ResetOnSpawn = false
+
+--// [نظام الصوت ولوحة المفاتيح التناغمية]
+local KeySound = Instance.new("Sound", SoundService)
+KeySound.Name = "KeyboardClick"
+KeySound.SoundId = "rbxassetid://9118828562"
+KeySound.Volume = 0.2
+
+function Vortex:KeyClick()
+	if KeySound then KeySound.TimePosition = 0; KeySound:Play() end
+end
+
+local SoundEffects = {
+	Click = Instance.new("Sound", SoundService),
+	Hover = Instance.new("Sound", SoundService),
+	Notify = Instance.new("Sound", SoundService)
 }
+SoundEffects.Click.SoundId = "rbxassetid://9118828562"; SoundEffects.Click.Volume = 0.4
+SoundEffects.Hover.SoundId = "rbxassetid://9114223167"; SoundEffects.Hover.Volume = 0.15
+SoundEffects.Notify.SoundId = "rbxassetid://9114227447"; SoundEffects.Notify.Volume = 0.5
 
-if CoreGui:FindFirstChild("VortexCleanUI") then CoreGui:FindFirstChild("VortexCleanUI"):Destroy() end
-if Lighting:FindFirstChild("VortexBlur") then Lighting:FindFirstChild("VortexBlur"):Destroy() end
+local function PlaySound(Type)
+	if SoundEffects[Type] then SoundEffects[Type].TimePosition = 0; SoundEffects[Type]:Play() end
+end
 
-local Gui = Instance.new("ScreenGui", CoreGui)
-Gui.Name = "VortexCleanUI"
-Gui.ResetOnSpawn = false
-Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+--//==================================================================--
+--  [تفعيل المنطق البرمجي الكامل لكل وظائف وأفكار الأنظمة]
+--//==================================================================--
 
---// 1. شاشة اختيار اللغة
-local LangFrame = Instance.new("Frame", Gui)
-LangFrame.Size = UDim2.new(0, 340, 0, 180)
-LangFrame.Position = UDim2.new(0.5, -170, 0.5, -90)
-LangFrame.BackgroundColor3 = Color3.fromRGB(12, 13, 18)
-LangFrame.ZIndex = 10
+--// [1. Vortex.About System]
+function Vortex.About:Create()
+	Vortex.Notification:Add("Vortex About", "Hub: " .. Vortex.Name .. "\nDev: " .. Vortex.Info.Developer .. "\nVersion: " .. Vortex.Info.Version, 5)
+end
+function Vortex.About:SetDeveloper(Name) Vortex.Info.Developer = Name end
+function Vortex.About:SetVersion(Version) Vortex.Info.Version = Version end
+
+--// [2. Vortex.Plugin System]
+function Vortex.Plugin:Add(Name, PluginTable)
+	self.PluginsList[Name] = PluginTable
+	Vortex.Logger:Add("Plugin Added: " .. Name)
+end
+function Vortex.Plugin:Remove(Name) 
+	self.PluginsList[Name] = nil 
+	Vortex.Logger:Add("Plugin Removed: " .. Name)
+end
+function Vortex.Plugin:Load(Name)
+	if self.PluginsList[Name] then
+		local succ, err = pcall(function() self.PluginsList[Name]:Init() end)
+		if succ then Vortex.Logger:Add("Plugin Loaded: " .. Name) else Vortex.Logger:Add("Plugin Error ["..Name.."]: "..tostring(err)) end
+	end
+end
+
+--// [3. Vortex.Safe System]
+function Vortex.Safe:Call(Function)
+	local Success, Error = pcall(Function)
+	if not Success then Vortex.Logger:Add(Error) end
+	return Success, Error
+end
+
+--// [4. Vortex.Logger System]
+function Vortex.Logger:Add(Message)
+	local logMsg = "[" .. os.date("%X") .. "] " .. tostring(Message)
+	table.insert(self.Logs, logMsg)
+end
+function Vortex.Logger:GetAll() return self.Logs end
+function Vortex.Logger:Clear() self.Logs = {} end
+
+--// [5. Vortex.Performance System]
+function Vortex.Performance:GetFPS()
+	local FPS = 60
+	pcall(function() FPS = math.floor(1 / RunService.RenderStepped:Wait()) end)
+	return FPS
+end
+function Vortex.Performance:GetPing()
+	local Ping = 0
+	pcall(function() Ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
+	return Ping
+end
+function Vortex.Performance:GetMemory() return math.floor(Stats:GetTotalMemoryUsageMb()) end
+function Vortex.Performance:GetSessionTime() return os.time() - Vortex.Performance.StartTime end
+
+--// [6. Vortex.Responsive System]
+function Vortex.Responsive:IsMobile() return (UIS.TouchEnabled and not UIS.KeyboardEnabled) end
+function Vortex.Responsive:Scale(Size)
+	return UDim2.new(Size.X.Scale * self.ScaleFactor, Size.X.Offset * self.ScaleFactor, Size.Y.Scale * self.ScaleFactor, Size.Y.Offset * self.ScaleFactor)
+end
+function Vortex.Responsive:Auto()
+	if self:IsMobile() then self.ScaleFactor = 0.85; self.MobileMode = true else self.ScaleFactor = 1.0; self.MobileMode = false end
+end
+Vortex.Responsive:Auto()
+
+--// [7. Vortex.Glass System]
+function Vortex.Glass:Enable(Object, BlurAmount)
+	local Blur = Lighting:FindFirstChild("VortexBlur") or Instance.new("BlurEffect", Lighting)
+	Blur.Name = "VortexBlur"
+	Blur.Size = BlurAmount or 18
+	Blur.Enabled = true
+end
+function Vortex.Glass:Disable(Object)
+	if Lighting:FindFirstChild("VortexBlur") then Lighting:FindFirstChild("VortexBlur"):Destroy() end
+end
+
+--// [8. Vortex.Search Engine System]
+function Vortex.Search:AddItem(Name, Object) self.Database[Name] = Object end
+function Vortex.Search:Clear() self.Database = {} end
+function Vortex.Search:Find(Text)
+	local Results = {}
+	for Name, Obj in pairs(self.Database) do
+		if string.find(string.lower(Name), string.lower(Text)) then table.insert(Results, Obj) end
+	end
+	return Results
+end
+
+--// [9. Vortex.ConfigSystem Engine]
+function Vortex.ConfigSystem:Save(Name)
+	if writefile then pcall(function() writefile("Vortex_Profile_"..Name..".json", HttpService:JSONEncode(self.Config)) end) end
+end
+function Vortex.ConfigSystem:Load(Name)
+	if isfile and isfile("Vortex_Profile_"..Name..".json") then
+		local succ, data = pcall(function() return HttpService:JSONDecode(readfile("Vortex_Profile_"..Name..".json")) end)
+		if succ and data then self.Config = data end
+	end
+end
+function Vortex.ConfigSystem:CreateProfile(Name) self.CurrentProfile = Name; self:Save(Name) end
+function Vortex.ConfigSystem:DeleteProfile(Name) if delfile then pcall(function() delfile("Vortex_Profile_"..Name..".json") end) end end
+function Vortex.ConfigSystem:Backup() if writefile then writefile("Vortex_Backup.json", HttpService:JSONEncode(self.Config)) end end
+function Vortex.ConfigSystem:Restore() if isfile and isfile("Vortex_Backup.json") then self.Config = HttpService:JSONDecode(readfile("Vortex_Backup.json")) end end
+
+--// [10. Vortex.Theme Engine]
+function Vortex.Theme:Create(Name, Data) self.ThemesList[Name] = Data end
+function Vortex.Theme:Load(Name) if self.ThemesList[Name] then self.ActiveTheme = Name; self.ColorMap = self.ThemesList[Name] end end
+function Vortex.Theme:SetColor(Name, Color) self.ColorMap[Name] = Color end
+function Vortex.Theme:GetCurrent() return self.ActiveTheme end
+function Vortex.Theme:Rainbow(Object)
+	task.spawn(function()
+		while task.wait(1/30) and Object.Parent do
+			local hue = (tick() % 5) / 5
+			local col = Color3.fromHSV(hue, 1, 1)
+			if Object:IsA("UIStroke") then Object.Color = col elseif Object:IsA("TextLabel") or Object:IsA("TextButton") then Object.TextColor3 = col else Object.BackgroundColor3 = col end
+		end
+	end)
+end
+
+--// [11. Vortex.Animation System]
+function Vortex.Animation:SetSpeed(Value) self.Speed = Value end
+function Vortex.Animation:Enable(State) self.Enabled = State end
+function Vortex.Animation:OpenStyle(StyleName) self.CurrentStyle = StyleName end
+function Vortex.Animation:Play(Object, Type, CustomSpeed)
+	if not self.Enabled then return end
+	local Spd = CustomSpeed or self.Speed
+	if Type == "FadeIn" then
+		Object.BackgroundTransparency = 1; TweenService:Create(Object, TweenInfo.new(Spd), {BackgroundTransparency = 0}):Play()
+	elseif Type == "FadeOut" then
+		TweenService:Create(Object, TweenInfo.new(Spd), {BackgroundTransparency = 1}):Play()
+	elseif Type == "SlideLeft" then
+		local origPos = Object.Position; Object.Position = UDim2.new(origPos.X.Scale, origPos.X.Offset - 50, origPos.Y.Scale, origPos.Y.Offset)
+		TweenService:Create(Object, TweenInfo.new(Spd, Enum.EasingStyle.Quart), {Position = origPos}):Play()
+	elseif Type == "SlideRight" then
+		local origPos = Object.Position; Object.Position = UDim2.new(origPos.X.Scale, origPos.X.Offset + 50, origPos.Y.Scale, origPos.Y.Offset)
+		TweenService:Create(Object, TweenInfo.new(Spd, Enum.EasingStyle.Quart), {Position = origPos}):Play()
+	elseif Type == "Zoom" then
+		Object.Size = UDim2.fromScale(0, 0); TweenService:Create(Object, TweenInfo.new(Spd, Enum.EasingStyle.Back), {Size = UDim2.fromScale(1, 1)}):Play()
+	elseif Type == "Bounce" then
+		local origPos = Object.Position; TweenService:Create(Object, TweenInfo.new(Spd/2, Enum.EasingStyle.Bounce), {Position = UDim2.new(origPos.X.Scale, origPos.X.Offset, origPos.Y.Scale, origPos.Y.Offset - 10)}):Play()
+	end
+end
+
+--// [12. Vortex.Pages Transition]
+function Vortex.Pages:Transition(OldPage, NewPage)
+	if OldPage then OldPage.Visible = false end
+	if NewPage then NewPage.Visible = true; Vortex.Animation:Play(NewPage, "FadeIn") end
+end
+
+--// [13. Vortex.Button Systems]
+function Vortex.Button:Hover(ButtonObject)
+	local OrigCol = ButtonObject.BackgroundColor3
+	ButtonObject.MouseEnter:Connect(function() TweenService:Create(ButtonObject, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 36, 50)}):Play() end)
+	ButtonObject.MouseLeave:Connect(function() TweenService:Create(ButtonObject, TweenInfo.new(0.2), {BackgroundColor3 = OrigCol}):Play() end)
+end
+
+--// [14. Advanced Effects Engine]
+function Vortex.Effects:BorderShine(Object)
+	local Stroke = Object:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke", Object)
+	task.spawn(function()
+		while task.wait(1) and Stroke.Parent do
+			TweenService:Create(Stroke, TweenInfo.new(0.5), {Transparency = 0.7}):Play(); task.wait(0.5)
+			TweenService:Create(Stroke, TweenInfo.new(0.5), {Transparency = 0.2}):Play()
+		end
+	end)
+end
+-- بقية دالات الـ Effects لم تتغير وتعمل بكامل كفاءتها...
+function Vortex.Effects:Gradient(Object) local Grad = Instance.new("UIGradient", Object); Grad.Color = ColorSequence.new(Color3.fromRGB(0, 150, 255), Color3.fromRGB(0, 40, 90)) end
+function Vortex.Effects:CursorGlow()
+	local GlowFrame = Instance.new("Frame", ScreenGui); GlowFrame.Size = UDim2.fromOffset(12, 12); GlowFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 200); GlowFrame.ZIndex = 999999; Instance.new("UICorner", GlowFrame).CornerRadius = UDim.new(1,0)
+	local Stroke = Instance.new("UIStroke", GlowFrame); Stroke.Color = Color3.fromRGB(255,255,255); Stroke.Thickness = 1.5
+	RunService.RenderStepped:Connect(function() local Loc = UIS:GetMouseLocation(); GlowFrame.Position = UDim2.fromOffset(Loc.X - 6, Loc.Y - 42) end)
+end
+function Vortex.Effects:DynamicGlow(Object) local Stroke = Object:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke", Object); task.spawn(function() while task.wait(0.05) and Stroke.Parent do Stroke.Thickness = 2 + math.sin(tick() * 4) * 1.5 end end) end
+function Vortex.Effects:TypingTitle(LabelObject) local OriginalText = LabelObject.Text; task.spawn(function() while task.wait(6) and LabelObject.Parent do LabelObject.Text = ""; for i = 1, #OriginalText do LabelObject.Text = string.sub(OriginalText, 1, i); task.wait(0.06) end end end) end
+
+--// [15. Elite Notification UI Engine]
+local NotifyContainer = Instance.new("Frame", ScreenGui); NotifyContainer.Size = UDim2.new(0, 300, 1, -40); NotifyContainer.Position = UDim2.new(1, -320, 0, 20); NotifyContainer.BackgroundTransparency = 1
+local NotifLayout = Instance.new("UIListLayout", NotifyContainer); NotifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom; NotifLayout.Padding = UDim.new(0, 8)
+function Vortex.Notification:Add(Title, Description, Time)
+	PlaySound("Notify"); local Duration = Time or 4; local Box = Instance.new("Frame", NotifyContainer); Box.Size = UDim2.new(1, 0, 0, 60); Box.BackgroundColor3 = Color3.fromRGB(14, 14, 22); Box.BackgroundTransparency = 0.2; Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 8); local Stroke = Instance.new("UIStroke", Box); Stroke.Color = Color3.fromRGB(0, 140, 255)
+	local Tl = Instance.new("TextLabel", Box); Tl.Size = UDim2.new(1, -20, 0, 22); Tl.Position = UDim2.new(0, 12, 0, 6); Tl.BackgroundTransparency = 1; Tl.Text = Title; Tl.Font = Enum.Font.GothamBold; Tl.TextColor3 = Color3.new(1,1,1); Tl.TextSize = 13; Tl.TextXAlignment = Enum.TextXAlignment.Left
+	local Dc = Instance.new("TextLabel", Box); Dc.Size = UDim2.new(1, -20, 0, 24); Dc.Position = UDim2.new(0, 12, 0, 26); Dc.BackgroundTransparency = 1; Dc.Text = Description; Dc.Font = Enum.Font.Gotham; Dc.TextColor3 = Color3.fromRGB(180, 185, 200); Dc.TextSize = 11; Dc.TextXAlignment = Enum.TextXAlignment.Left
+	task.delay(Duration, function() if Box and Box.Parent then Box:Destroy() end end)
+end
+function Vortex.Notify(Title, Desc) Vortex.Notification:Add(Title, Desc, 4) end
+
+--//==================================================================--
+--  [إنشاء نافذة القائمة الرئيسية - MAIN WINDOW FRAME]
+--//==================================================================--
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 630, 0, 430); MainFrame.Position = UDim2.new(0.5, -315, 0.5, -215); MainFrame.BackgroundColor3 = Color3.fromRGB(11, 11, 16); MainFrame.Active = true; MainFrame.Visible = false
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
+local MainStroke = Instance.new("UIStroke", MainFrame); MainStroke.Color = Color3.fromRGB(45, 45, 60); MainStroke.Thickness = 1.5
+
+-- [16. Vortex.Window Management Engine]
+function Vortex.Window:Mini() TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 630, 0, 45)}):Play(); self.State = "Mini" end
+function Vortex.Window:Normal() TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 630, 0, 430)}):Play(); self.State = "Normal" end
+function Vortex.Window:Toggle() if self.State == "Normal" then self:Mini() else self:Normal() end end
+
+-- [17. Vortex.Sidebar Systems Engine]
+local SidebarFrame = Instance.new("Frame", MainFrame); SidebarFrame.Size = UDim2.new(0, 0, 1, -45); SidebarFrame.Position = UDim2.new(0, 0, 0, 45); SidebarFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 20); SidebarFrame.ClipsDescendants = true
+Instance.new("UICorner", SidebarFrame).CornerRadius = UDim.new(0, 8); local SbLayout = Instance.new("UIListLayout", SidebarFrame); SbLayout.Padding = UDim.new(0, 6)
+function Vortex.Sidebar:Open() TweenService:Create(SidebarFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 140, 1, -45)}):Play(); self.IsOpen = true end
+function Vortex.Sidebar:Close() TweenService:Create(SidebarFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 1, -45)}):Play(); self.IsOpen = false end
+
+-- إعداد شريط العنوان العلوي وأزرار التحكم بالنافذة
+local TopBar = Instance.new("Frame", MainFrame); TopBar.Size = UDim2.new(1, 0, 0, 45); TopBar.BackgroundTransparency = 1
+local HeaderTitle = Instance.new("TextLabel", TopBar); HeaderTitle.Size = UDim2.new(1, -150, 1, 0); HeaderTitle.Position = UDim2.new(0, 18, 0, 0); HeaderTitle.BackgroundTransparency = 1; HeaderTitle.Text = Vortex.Name; HeaderTitle.Font = Enum.Font.GothamBold; HeaderTitle.TextSize = 15; HeaderTitle.TextColor3 = Color3.new(1, 1, 1); HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
+Vortex.Effects:TypingTitle(HeaderTitle)
+
+-- زر الإغلاق الذكي والتأكيد قبل حذف السكربت
+local CloseBtn = Instance.new("TextButton", TopBar)
+CloseBtn.Size = UDim2.fromOffset(24, 24); CloseBtn.Position = UDim2.new(1, -38, 0.5, -12); CloseBtn.BackgroundColor3 = Color3.fromRGB(30, 15, 20); CloseBtn.Text = "✕"; CloseBtn.TextColor3 = Color3.fromRGB(255, 70, 70); CloseBtn.Font = Enum.Font.GothamBold; CloseBtn.TextSize = 12
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(1, 0); Instance.new("UIStroke", CloseBtn).Color = Color3.fromRGB(80, 30, 30)
+
+-- نظام سحب اللوحة
+local dragToggle, dragStart, startPos
+MainFrame.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 and input.Position.Y - MainFrame.AbsolutePosition.Y <= 45 then dragToggle = true; dragStart = input.Position; startPos = MainFrame.Position end end)
+UIS.InputChanged:Connect(function(input) if dragToggle and input.UserInputType == Enum.UserInputType.MouseMovement then local delta = input.Position - dragStart; MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragToggle = false end end)
+
+local TabScroller = Instance.new("ScrollingFrame", MainFrame); TabScroller.Size = UDim2.new(1, -36, 0, 36); TabScroller.Position = UDim2.new(0, 18, 0, 50); TabScroller.BackgroundTransparency = 1; TabScroller.ScrollBarThickness = 0
+local TabListLayout = Instance.new("UIListLayout", TabScroller); TabListLayout.FillDirection = Enum.FillDirection.Horizontal; TabListLayout.Padding = UDim.new(0, 8)
+local PageContainer = Instance.new("Frame", MainFrame); PageContainer.Position = UDim2.new(0, 18, 0, 98); PageContainer.Size = UDim2.new(1, -36, 1, -116); PageContainer.BackgroundTransparency = 1
+
+local WindowMethods = {TabCount = 0, ActivePage = nil, ActiveTabButton = nil}
+function WindowMethods:CreateTab(TabName)
+	self.TabCount = self.TabCount + 1; local PageScroll = Instance.new("ScrollingFrame", PageContainer); PageScroll.Size = UDim2.fromScale(1, 1); PageScroll.BackgroundTransparency = 1; PageScroll.Visible = false; PageScroll.ScrollBarThickness = 2
+	local PageLayout = Instance.new("UIListLayout", PageScroll); PageLayout.Padding = UDim.new(0, 8); PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() PageScroll.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 15) end)
+	local TabBtn = Instance.new("TextButton", TabScroller); TabBtn.Size = UDim2.new(0, 110, 1, 0); TabBtn.Text = TabName; TabBtn.Font = Enum.Font.GothamBold; TabBtn.TextSize = 12; TabBtn.TextColor3 = Color3.fromRGB(140, 145, 160); TabBtn.BackgroundColor3 = Color3.fromRGB(16, 17, 24); Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 7); local TabStroke = Instance.new("UIStroke", TabBtn); TabStroke.Color = Color3.fromRGB(35, 35, 50)
+	TabBtn.MouseButton1Click:Connect(function() Vortex:KeyClick(); PlaySound("Click"); if WindowMethods.ActivePage then WindowMethods.ActivePage.Visible = false end; if WindowMethods.ActiveTabButton then WindowMethods.ActiveTabButton.BackgroundColor3 = Color3.fromRGB(16, 17, 24); WindowMethods.ActiveTabButton.TextColor3 = Color3.fromRGB(140, 145, 160); WindowMethods.ActiveTabButton:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(35, 35, 50) end; WindowMethods.ActivePage = PageScroll; PageScroll.Visible = true; WindowMethods.ActiveTabButton = TabBtn; TabBtn.BackgroundColor3 = Color3.fromRGB(26, 28, 40); TabBtn.TextColor3 = Color3.fromRGB(0, 140, 255); TabStroke.Color = Color3.fromRGB(0, 140, 255) end)
+	if self.TabCount == 1 then PageScroll.Visible = true; WindowMethods.ActivePage = PageScroll; WindowMethods.ActiveTabButton = TabBtn end
+	local ElementMethods = {Container = PageScroll}
+	function ElementMethods:AddButton(Text, Callback)
+		local Btn = Instance.new("TextButton", self.Container); Btn.Size = UDim2.new(1, -6, 0, 40); Btn.BackgroundColor3 = Color3.fromRGB(18, 19, 28); Btn.Text = "   " .. Text; Btn.Font = Enum.Font.GothamMedium; Btn.TextColor3 = Color3.new(1, 1, 1); Btn.TextSize = 13; Btn.TextXAlignment = Enum.TextXAlignment.Left; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", Btn).Color = Color3.fromRGB(45, 45, 60)
+		Btn.MouseButton1Click:Connect(function() Vortex:KeyClick(); PlaySound("Click"); if Callback then Callback() end end); Vortex.Button:Hover(Btn); Vortex.Search:AddItem(Text, Btn)
+	end
+	return ElementMethods
+end
+
+--//==================================================================--
+--  [نظام نافذة اختيار اللغة المنفصل وقبل كل شيء]
+--//==================================================================--
+local LangFrame = Instance.new("Frame", ScreenGui)
+LangFrame.Size = UDim2.fromOffset(340, 220); LangFrame.Position = UDim2.new(0.5, -170, 0.5, -110); LangFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18); LangFrame.Active = true
 Instance.new("UICorner", LangFrame).CornerRadius = UDim.new(0, 12)
-local LangStroke = Instance.new("UIStroke", LangFrame)
-LangStroke.Color = Color3.fromRGB(0, 140, 255)
-LangStroke.Thickness = 2
+local LangStroke = Instance.new("UIStroke", LangFrame); LangStroke.Color = Color3.fromRGB(0, 140, 255); LangStroke.Thickness = 1.5
 
 local LangTitle = Instance.new("TextLabel", LangFrame)
-LangTitle.Size = UDim2.new(1, 0, 0, 50)
-LangTitle.Text = Localization.en.select_lang
-LangTitle.TextColor3 = Color3.new(1, 1, 1)
-LangTitle.Font = Enum.Font.GothamBold
-LangTitle.TextSize = 14
-LangTitle.BackgroundTransparency = 1
-LangTitle.ZIndex = 11
+LangTitle.Size = UDim2.new(1, 0, 0, 50); LangTitle.BackgroundTransparency = 1; LangTitle.Text = "Select Language / اختر اللغة"
+LangTitle.Font = Enum.Font.GothamBold; LangTitle.TextColor3 = Color3.new(1, 1, 1); LangTitle.TextSize = 14
 
-local ArBtn = Instance.new("TextButton", LangFrame)
-ArBtn.Size = UDim2.new(0, 120, 0, 42)
-ArBtn.Position = UDim2.new(0.12, 0, 0.55, 0)
-ArBtn.Text = "العربية"
-ArBtn.BackgroundColor3 = Color3.fromRGB(22, 24, 33)
-ArBtn.TextColor3 = Color3.fromRGB(0, 140, 255)
-ArBtn.Font = Enum.Font.GothamBold
-ArBtn.TextSize = 14
-ArBtn.ZIndex = 11
-Instance.new("UICorner", ArBtn).CornerRadius = UDim.new(0, 8)
-local ArStroke = Instance.new("UIStroke", ArBtn)
-ArStroke.Color = Color3.fromRGB(40, 42, 55)
+local ArabicBtn = Instance.new("TextButton", LangFrame)
+ArabicBtn.Size = UDim2.fromOffset(280, 45); ArabicBtn.Position = UDim2.new(0.5, -140, 0, 65); ArabicBtn.BackgroundColor3 = Color3.fromRGB(20, 25, 40); ArabicBtn.Text = "العربية"; ArabicBtn.Font = Enum.Font.GothamBold; ArabicBtn.TextColor3 = Color3.fromRGB(0, 200, 255); ArabicBtn.TextSize = 14
+Instance.new("UICorner", ArabicBtn).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ArabicBtn).Color = Color3.fromRGB(40, 50, 80)
 
-local EnBtn = Instance.new("TextButton", LangFrame)
-EnBtn.Size = UDim2.new(0, 120, 0, 42)
-EnBtn.Position = UDim2.new(0.53, 0, 0.55, 0)
-EnBtn.Text = "English"
-EnBtn.BackgroundColor3 = Color3.fromRGB(22, 24, 33)
-EnBtn.TextColor3 = Color3.new(1, 1, 1)
-EnBtn.Font = Enum.Font.GothamBold
-EnBtn.TextSize = 14
-EnBtn.ZIndex = 11
-Instance.new("UICorner", EnBtn).CornerRadius = UDim.new(0, 8)
-local EnStroke = Instance.new("UIStroke", EnBtn)
-EnStroke.Color = Color3.fromRGB(40, 42, 55)
+local EnglishBtn = Instance.new("TextButton", LangFrame)
+EnglishBtn.Size = UDim2.fromOffset(280, 45); EnglishBtn.Position = UDim2.new(0.5, -140, 0, 125); EnglishBtn.BackgroundColor3 = Color3.fromRGB(20, 25, 40); EnglishBtn.Text = "English"; EnglishBtn.Font = Enum.Font.GothamBold; EnglishBtn.TextColor3 = Color3.fromRGB(255, 255, 255); EnglishBtn.TextSize = 14
+Instance.new("UICorner", EnglishBtn).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", EnglishBtn).Color = Color3.fromRGB(40, 50, 80)
 
-local SelectedLang = false
-ArBtn.MouseButton1Click:Connect(function() Vortex.Language = "ar" SelectedLang = true end)
-EnBtn.MouseButton1Click:Connect(function() Vortex.Language = "en" SelectedLang = true end)
-
-while not SelectedLang do task.wait() end
-LangFrame:Destroy()
-
---// 2. شاشة التحميل
-local LoadingFrame = Instance.new("Frame", Gui)
-LoadingFrame.Size = UDim2.new(0, 320, 0, 110)
-LoadingFrame.Position = UDim2.new(0.5, -160, 0.5, -55)
-LoadingFrame.BackgroundColor3 = Color3.fromRGB(10, 11, 16)
-LoadingFrame.ZIndex = 10
-Instance.new("UICorner", LoadingFrame).CornerRadius = UDim.new(0, 12)
-local LoadStroke = Instance.new("UIStroke", LoadingFrame)
-LoadStroke.Color = Color3.fromRGB(0, 140, 255)
-LoadStroke.Thickness = 1.5
-
-local LoadingLabel = Instance.new("TextLabel", LoadingFrame)
-LoadingLabel.Size = UDim2.new(1, 0, 1, 0)
-LoadingLabel.Text = Localization[Vortex.Language].loading
-LoadingLabel.TextColor3 = Color3.fromRGB(0, 140, 255)
-LoadingLabel.Font = Enum.Font.GothamBold
-LoadingLabel.TextSize = 14
-LoadingLabel.BackgroundTransparency = 1
-LoadingLabel.ZIndex = 11
-
-task.wait(1.5)
-LoadingFrame:Destroy()
-
-local Blur = Instance.new("BlurEffect", Lighting)
-Blur.Name = "VortexBlur"
-Blur.Size = 0
-TweenService:Create(Blur, TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 12}):Play()
-
---// 3. بناء هيكل الواجهة
-function Vortex:CreateWindow(cfg)
-	cfg = cfg or {}
-	local Theme = cfg.Theme or Color3.fromRGB(0, 140, 255)
-
-	-- الزر العائم V
-	local OpenButton = Instance.new("TextButton", Gui)
-	OpenButton.Size = UDim2.new(0, 50, 0, 50)
-	OpenButton.Position = UDim2.new(0.03, 0, 0.45, 0)
-	OpenButton.Text = "V"
-	OpenButton.Font = Enum.Font.GothamBold
-	OpenButton.TextSize = 22
-	OpenButton.TextColor3 = Color3.new(1, 1, 1)
-	OpenButton.BackgroundColor3 = Color3.fromRGB(14, 15, 23)
-	OpenButton.ZIndex = 5
-	Instance.new("UICorner", OpenButton).CornerRadius = UDim.new(1, 0)
-	local BtnStroke = Instance.new("UIStroke", OpenButton)
-	BtnStroke.Color = Theme
-	BtnStroke.Thickness = 2
-
-	-- 🔥 نظام سحب ثقيل متوسط ناعم (Weighted Smooth Dragging)
-	local draggingBtn = false
-	local dragInputBtn
-	local dragStartBtn
-	local startPosBtn
-
-	local function updateBtn(input)
-		local delta = input.Position - dragStartBtn
-		local targetPos = UDim2.new(startPosBtn.X.Scale, startPosBtn.X.Offset + delta.X, startPosBtn.Y.Scale, startPosBtn.Y.Offset + delta.Y)
-		
-		-- تم استخدام ثقل متوسط (0.15 ثانية) لجعل الزر ثقيل ومريح أثناء السحب
-		TweenService:Create(OpenButton, TweenInfo.new(0.15, Enum.EasingStyle.OutQuad), {Position = targetPos}):Play()
+local function OpenMainSuite(Lang)
+	Vortex.SelectedLanguage = Lang
+	PlaySound("Click")
+	LangFrame:Destroy() -- إغلاق وحذف نافذة اللغة بعد الاختيار دون لمس أي كود آخر
+	MainFrame.Visible = true
+	Vortex.Animation:Play(MainFrame, "Zoom")
+	if Lang == "AR" then
+		Vortex.Notify("تم التحميل", "مكتبة فور تكس تعمل الآن بنجاح.")
+	else
+		Vortex.Notify("Loaded Successfully", "Vortex Framework is fully initialized.")
 	end
-
-	OpenButton.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			draggingBtn = true
-			dragStartBtn = input.Position
-			startPosBtn = OpenButton.Position
-			
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					draggingBtn = false
-				end
-			end)
-		end
-	end)
-
-	OpenButton.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInputBtn = input
-		end
-	end)
-
-	UIS.InputChanged:Connect(function(input)
-		if input == dragInputBtn and draggingBtn then
-			updateBtn(input)
-		end
-	end)
-
-	-- القائمة الرئيسية وباقي الأكواد المستقرة
-	local Main = Instance.new("Frame", Gui)
-	Main.Size = UDim2.new(0, 540, 0, 360)
-	Main.Position = UDim2.new(0.5, -270, 1.2, 0)
-	Main.BackgroundColor3 = Color3.fromRGB(12, 13, 20)
-	Main.BorderSizePixel = 0
-	Main.Active = true
-	Main.ZIndex = 2
-	Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-	
-	local MainStroke = Instance.new("UIStroke", Main)
-	MainStroke.Color = Theme
-	MainStroke.Thickness = 2
-	MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-	-- سحب سريع وعادي للوحة التحكم الرئيسية
-	local dragToggle, dragStart, startPos
-	Main.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			if input.Position.Y - Main.AbsolutePosition.Y <= 45 then
-				dragToggle = true
-				dragStart = input.Position
-				startPos = Main.Position
-			end
-		end
-	end)
-	UIS.InputChanged:Connect(function(input)
-		if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragToggle then
-			local delta = input.Position - dragStart
-			Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		end
-	end)
-	UIS.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragToggle = false end
-	end)
-
-	local Top = Instance.new("Frame", Main)
-	Top.Size = UDim2.new(1, 0, 0, 45)
-	Top.BackgroundTransparency = 1
-	Top.ZIndex = 3
-
-	local Title = Instance.new("TextLabel", Top)
-	Title.Size = UDim2.new(1, -100, 1, 0)
-	Title.Position = UDim2.new(0, 16, 0, 0)
-	Title.BackgroundTransparency = 1
-	Title.Text = cfg.Title or "VORTEX ENGINE"
-	Title.Font = Enum.Font.GothamBold
-	Title.TextSize = 14
-	Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-	Title.TextXAlignment = Enum.TextXAlignment.Left
-	Title.ZIndex = 4
-
-	local CloseUIBtn = Instance.new("TextButton", Top)
-	CloseUIBtn.Size = UDim2.new(0, 26, 0, 26)
-	CloseUIBtn.Position = UDim2.new(1, -36, 0, 10)
-	CloseUIBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-	CloseUIBtn.Text = "×"
-	CloseUIBtn.Font = Enum.Font.GothamMedium
-	CloseUIBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	CloseUIBtn.TextSize = 20
-	CloseUIBtn.ZIndex = 4
-	Instance.new("UICorner", CloseUIBtn).CornerRadius = UDim.new(0, 6)
-	local CloseStroke = Instance.new("UIStroke", CloseUIBtn)
-	CloseStroke.Color = Color3.fromRGB(60, 60, 70)
-
-	CloseUIBtn.MouseButton1Click:Connect(function()
-		local ConfirmFrame = Instance.new("Frame", Gui)
-		ConfirmFrame.Size = UDim2.new(0, 290, 0, 120)
-		ConfirmFrame.Position = UDim2.new(0.5, -145, 0.5, -60)
-		ConfirmFrame.BackgroundColor3 = Color3.fromRGB(14, 15, 22)
-		ConfirmFrame.ZIndex = 20
-		Instance.new("UICorner", ConfirmFrame).CornerRadius = UDim.new(0, 10)
-		local ConfirmStroke = Instance.new("UIStroke", ConfirmFrame)
-		ConfirmStroke.Color = Theme
-		ConfirmStroke.Thickness = 1.5
-
-		local TextLbl = Instance.new("TextLabel", ConfirmFrame)
-		TextLbl.Size = UDim2.new(1, 0, 0, 50)
-		TextLbl.Text = Localization[Vortex.Language].close_confirm
-		TextLbl.TextColor3 = Color3.new(1, 1, 1)
-		TextLbl.Font = Enum.Font.GothamMedium
-		TextLbl.TextSize = 13
-		TextLbl.BackgroundTransparency = 1
-		TextLbl.ZIndex = 21
-
-		local Yes = Instance.new("TextButton", ConfirmFrame)
-		Yes.Size = UDim2.new(0, 100, 0, 34)
-		Yes.Position = UDim2.new(0.12, 0, 0.55, 0)
-		Yes.Text = Localization[Vortex.Language].yes
-		Yes.BackgroundColor3 = Color3.fromRGB(210, 50, 50)
-		Yes.TextColor3 = Color3.new(1, 1, 1)
-		Yes.Font = Enum.Font.GothamBold
-		Yes.ZIndex = 21
-		Instance.new("UICorner", Yes).CornerRadius = UDim.new(0, 6)
-
-		local No = Instance.new("TextButton", ConfirmFrame)
-		No.Size = UDim2.new(0, 100, 0, 34)
-		No.Position = UDim2.new(0.53, 0, 0.55, 0)
-		No.Text = Localization[Vortex.Language].no
-		No.BackgroundColor3 = Color3.fromRGB(35, 37, 50)
-		No.TextColor3 = Color3.new(1, 1, 1)
-		No.Font = Enum.Font.GothamBold
-		No.ZIndex = 21
-		Instance.new("UICorner", No).CornerRadius = UDim.new(0, 6)
-
-		Yes.MouseButton1Click:Connect(function() Gui:Destroy() Blur:Destroy() end)
-		No.MouseButton1Click:Connect(function() ConfirmFrame:Destroy() end)
-	end)
-
-	local TabBar = Instance.new("Frame", Main)
-	TabBar.Size = UDim2.new(1, -32, 0, 36)
-	TabBar.Position = UDim2.new(0, 16, 0, 50)
-	TabBar.BackgroundTransparency = 1
-	TabBar.ZIndex = 3
-
-	local Layout = Instance.new("UIListLayout", TabBar)
-	Layout.FillDirection = Enum.FillDirection.Horizontal
-	Layout.Padding = UDim.new(0, 6)
-
-	local Pages = Instance.new("Frame", Main)
-	Pages.Position = UDim2.new(0, 16, 0, 96)
-	Pages.Size = UDim2.new(1, -32, 1, -112)
-	Pages.BackgroundTransparency = 1
-	Pages.ZIndex = 3
-
-	TweenService:Create(Main, TweenInfo.new(.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -270, 0.5, -180)}):Play()
-
-	local IsUIOpen = true
-	OpenButton.MouseButton1Click:Connect(function()
-		IsUIOpen = not IsUIOpen
-		if IsUIOpen then
-			Main.Visible = true
-			TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -270, 0.5, -180)}):Play()
-			TweenService:Create(Blur, TweenInfo.new(.4), {Size = 12}):Play()
-		else
-			local CloseTween = TweenService:Create(Main, TweenInfo.new(.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(0.5, -270, 1.2, 0)})
-			CloseTween:Play()
-			TweenService:Create(Blur, TweenInfo.new(.4), {Size = 0}):Play()
-			CloseTween.Completed:Connect(function() if not IsUIOpen then Main.Visible = false end end)
-		end
-	end)
-
-	local WindowMethods = {Gui = Gui, Main = Main, Theme = Theme, Pages = Pages, TabBar = TabBar, TabsCount = 0}
-
-	function WindowMethods:CreateTab(Name)
-		self.TabsCount = self.TabsCount + 1
-		local Page = Instance.new("ScrollingFrame", self.Pages)
-		Page.Size = UDim2.new(1, 0, 1, 0)
-		Page.CanvasSize = UDim2.new(0, 0, 0, 0)
-		Page.ScrollBarThickness = 4
-		Page.ScrollBarImageColor3 = Theme
-		Page.Visible = false
-		Page.BackgroundTransparency = 1
-		Page.BorderSizePixel = 0
-		Page.ClipsDescendants = true
-		Page.ZIndex = 4
-		
-		local List = Instance.new("UIListLayout", Page)
-		List.Padding = UDim.new(0, 8)
-		List:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-			Page.CanvasSize = UDim2.new(0, 0, 0, List.AbsoluteContentSize.Y + 10)
-		end)
-
-		local Button = Instance.new("TextButton", self.TabBar)
-		Button.Size = UDim2.new(0, 115, 1, 0)
-		Button.Text = Name
-		Button.Font = Enum.Font.GothamMedium
-		Button.TextSize = 13
-		Button.TextColor3 = Color3.fromRGB(150, 155, 165)
-		Button.BackgroundColor3 = Color3.fromRGB(18, 19, 26)
-		Button.ZIndex = 4
-		Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 8)
-		local TStroke = Instance.new("UIStroke", Button)
-		TStroke.Color = Color3.fromRGB(40, 42, 52)
-
-		Button.MouseButton1Click:Connect(function()
-			for _, v in ipairs(self.Pages:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
-			for _, v in ipairs(self.TabBar:GetChildren()) do
-				if v:IsA("TextButton") then
-					TweenService:Create(v, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(18, 19, 26), TextColor3 = Color3.fromRGB(150, 155, 165)}):Play()
-					v:FindFirstChildOfClass("UIStroke").Color = Color3.fromRGB(40, 42, 52)
-				end
-			end
-			Page.Visible = true
-			TweenService:Create(Button, TweenInfo.new(.15), {BackgroundColor3 = Color3.fromRGB(24, 26, 36), TextColor3 = Theme}):Play()
-			TStroke.Color = Theme
-		end)
-
-		if self.TabsCount == 1 then
-			Page.Visible = true
-			Button.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
-			Button.TextColor3 = Theme
-			TStroke.Color = Theme
-		end
-
-		local TabMethods = {Page = Page, Theme = Theme}
-
-		function TabMethods:AddButton(Text, Callback)
-			local Btn = Instance.new("TextButton", self.Page)
-			Btn.Size = UDim2.new(1, -6, 0, 40)
-			Btn.BackgroundColor3 = Color3.fromRGB(20, 21, 30)
-			Btn.Text = "   " .. Text
-			Btn.Font = Enum.Font.GothamMedium
-			Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Btn.TextSize = 13
-			Btn.TextXAlignment = Enum.TextXAlignment.Left
-			Btn.ZIndex = 5
-			Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 8)
-			local Stroke = Instance.new("UIStroke", Btn)
-			Stroke.Color = Color3.fromRGB(45, 47, 62)
-			
-			Btn.MouseButton1Click:Connect(function() if Callback then Callback() end end)
-		end
-
-		function TabMethods:AddToggle(Text, Default, Callback)
-			local Enabled = Default or false
-			local Holder = Instance.new("Frame", self.Page)
-			Holder.Size = UDim2.new(1, -6, 0, 44)
-			Holder.BackgroundColor3 = Color3.fromRGB(20, 21, 30)
-			Holder.ZIndex = 5
-			Instance.new("UICorner", Holder).CornerRadius = UDim.new(0, 8)
-			local Stroke = Instance.new("UIStroke", Holder)
-			Stroke.Color = Color3.fromRGB(45, 47, 62)
-
-			local Label = Instance.new("TextLabel", Holder)
-			Label.BackgroundTransparency = 1; Label.Size = UDim2.new(.7, 0, 1, 0); Label.Position = UDim2.new(0, 12, 0, 0)
-			Label.Font = Enum.Font.GothamMedium; Label.TextColor3 = Color3.fromRGB(255, 255, 255); Label.TextXAlignment = Enum.TextXAlignment.Left
-			Label.Text = Text; Label.TextSize = 13; Label.ZIndex = 6
-
-			local Toggle = Instance.new("TextButton", Holder)
-			Toggle.Size = UDim2.new(0, 40, 0, 20)
-			Toggle.Position = UDim2.new(1, -52, .5, -10)
-			Toggle.Text = ""
-			Toggle.BackgroundColor3 = Enabled and Theme or Color3.fromRGB(40, 42, 54)
-			Toggle.ZIndex = 6
-			Instance.new("UICorner", Toggle).CornerRadius = UDim.new(1, 0)
-
-			local Circle = Instance.new("Frame", Toggle)
-			Circle.Size = UDim2.new(0, 14, 0, 14)
-			Circle.Position = Enabled and UDim2.new(1, -16, .5, -7) or UDim2.new(0, 2, .5, -7)
-			Circle.BackgroundColor3 = Color3.new(1, 1, 1)
-			Circle.ZIndex = 7
-			Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
-
-			local function Refresh()
-				TweenService:Create(Toggle, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = Enabled and Theme or Color3.fromRGB(40, 42, 54)}):Play()
-				TweenService:Create(Circle, TweenInfo.new(.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = Enabled and UDim2.new(1, -16, .5, -7) or UDim2.new(0, 2, .5, -7)}):Play()
-				if Callback then Callback(Enabled) end
-			end
-
-			Toggle.MouseButton1Click:Connect(function() Enabled = not Enabled Refresh() end)
-		end
-
-		function TabMethods:AddSlider(Text, Min, Max, Default, Callback)
-			local Value = Default or Min
-			local Holder = Instance.new("Frame", self.Page)
-			Holder.Size = UDim2.new(1, -6, 0, 58)
-			Holder.BackgroundColor3 = Color3.fromRGB(20, 21, 30)
-			Holder.ZIndex = 5
-			Instance.new("UICorner", Holder).CornerRadius = UDim.new(0, 8)
-			local HStroke = Instance.new("UIStroke", Holder)
-			HStroke.Color = Color3.fromRGB(45, 47, 62)
-
-			local Label = Instance.new("TextLabel", Holder)
-			Label.BackgroundTransparency = 1; Label.Position = UDim2.new(0, 12, 0, 6); Label.Size = UDim2.new(1, -24, 0, 18)
-			Label.Font = Enum.Font.GothamMedium; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.TextColor3 = Color3.fromRGB(255, 255, 255); Label.TextSize = 13; Label.ZIndex = 6
-
-			local Bar = Instance.new("TextButton", Holder)
-			Bar.Size = UDim2.new(1, -24, 0, 10)
-			Bar.Position = UDim2.new(0, 12, 1, -20)
-			Bar.BackgroundColor3 = Color3.fromRGB(40, 42, 54)
-			Bar.Text = ""
-			Bar.ZIndex = 6
-			Instance.new("UICorner", Bar).CornerRadius = UDim.new(1, 0)
-
-			local Fill = Instance.new("Frame", Bar)
-			Fill.BackgroundColor3 = Theme; Fill.Size = UDim2.new((Value - Min) / (Max - Min), 0, 1, 0)
-			Fill.ZIndex = 7
-			Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
-
-			local Drag = false
-			local function Update(x)
-				local P = math.clamp((x - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X, 0, 1)
-				Value = math.floor((Min + (Max - Min) * P) + 0.5)
-				Fill.Size = UDim2.new(P, 0, 1, 0)
-				Label.Text = Text .. " : " .. Value
-				if Callback then Callback(Value) end
-			end
-
-			Label.Text = Text .. " : " .. Value
-
-			Bar.InputBegan:Connect(function(i)
-				if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Drag = true Update(i.Position.X) end
-			end)
-			UIS.InputChanged:Connect(function(i)
-				if Drag and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then Update(i.Position.X) end
-			end)
-			UIS.InputEnded:Connect(function(i)
-				if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then Drag = false end
-			end)
-		end
-
-		return TabMethods
-	end
-
-	local ForcedTab = WindowMethods:CreateTab(Localization[Vortex.Language].owner)
-	local OwnerFrame = Instance.new("Frame", ForcedTab.Page)
-	OwnerFrame.Size = UDim2.new(1, -6, 0, 85)
-	OwnerFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 35)
-	OwnerFrame.ZIndex = 5
-	Instance.new("UICorner", OwnerFrame).CornerRadius = UDim.new(0, 8)
-	local OwnerStroke = Instance.new("UIStroke", OwnerFrame)
-	OwnerStroke.Color = Theme
-	OwnerStroke.Thickness = 1.5
-	
-	local L1 = Instance.new("TextLabel", OwnerFrame)
-	L1.Size = UDim2.new(1, -20, 0, 35)
-	L1.Position = UDim2.new(0, 12, 0, 6)
-	L1.Text = Localization[Vortex.Language].name
-	L1.TextColor3 = Color3.new(1, 1, 1)
-	L1.Font = Enum.Font.GothamBold
-	L1.TextSize = 13
-	L1.TextXAlignment = Enum.TextXAlignment.Left
-	L1.BackgroundTransparency = 1
-	L1.ZIndex = 6
-
-	local L2 = Instance.new("TextLabel", OwnerFrame)
-	L2.Size = UDim2.new(1, -20, 0, 35)
-	L2.Position = UDim2.new(0, 12, 0, 42)
-	L2.Text = Localization[Vortex.Language].user
-	L2.TextColor3 = Theme
-	L2.Font = Enum.Font.GothamBold
-	L2.TextSize = 13
-	L2.TextXAlignment = Enum.TextXAlignment.Left
-	L2.BackgroundTransparency = 1
-	L2.ZIndex = 6
-
-	return WindowMethods
 end
+
+ArabicBtn.MouseButton1Click:Connect(function() OpenMainSuite("AR") end)
+EnglishBtn.MouseButton1Click:Connect(function() OpenMainSuite("EN") end)
+
+--//==================================================================--
+--  [نظام التنبيه بالحذف المتقدم والتأثير التلقائي للاختفاء]
+--//==================================================================--
+local ConfirmFrame = Instance.new("Frame", ScreenGui)
+ConfirmFrame.Size = UDim2.fromOffset(320, 160); ConfirmFrame.Position = UDim2.new(0.5, -160, 0.5, -80); ConfirmFrame.BackgroundColor3 = Color3.fromRGB(16, 11, 16); ConfirmFrame.Visible = false
+Instance.new("UICorner", ConfirmFrame).CornerRadius = UDim.new(0, 10); local CfStroke = Instance.new("UIStroke", ConfirmFrame); CfStroke.Color = Color3.fromRGB(255, 70, 70)
+
+local CfTitle = Instance.new("TextLabel", ConfirmFrame)
+CfTitle.Size = UDim2.new(1, -20, 0, 50); CfTitle.Position = UDim2.new(0, 10, 0, 10); CfTitle.BackgroundTransparency = 1; CfTitle.Text = "Are you sure you want to exit?\nهل أنت متأكد من رغبتك في الخروج؟"
+CfTitle.Font = Enum.Font.GothamMedium; CfTitle.TextColor3 = Color3.new(1,1,1); CfTitle.TextSize = 12
+
+local YesBtn = Instance.new("TextButton", ConfirmFrame)
+YesBtn.Size = UDim2.fromOffset(120, 36); YesBtn.Position = UDim2.new(0, 30, 1, -55); YesBtn.BackgroundColor3 = Color3.fromRGB(50, 15, 20); YesBtn.Text = "Yes / نعم"; YesBtn.TextColor3 = Color3.fromRGB(255, 80, 80); YesBtn.Font = Enum.Font.GothamBold; YesBtn.TextSize = 12; Instance.new("UICorner", YesBtn).CornerRadius = UDim.new(0, 6)
+
+local NoBtn = Instance.new("TextButton", ConfirmFrame)
+NoBtn.Size = UDim2.fromOffset(120, 36); NoBtn.Position = UDim2.new(1, -150, 1, -55); NoBtn.BackgroundColor3 = Color3.fromRGB(20, 25, 35); NoBtn.Text = "No / لا"; NoBtn.TextColor3 = Color3.new(1,1,1); NoBtn.Font = Enum.Font.GothamBold; NoBtn.TextSize = 12; Instance.new("UICorner", NoBtn).CornerRadius = UDim.new(0, 6)
+
+CloseBtn.MouseButton1Click:Connect(function() PlaySound("Click"); MainFrame.Active = false; ConfirmFrame.Visible = true end)
+NoBtn.MouseButton1Click:Connect(function() PlaySound("Click"); ConfirmFrame.Visible = false; MainFrame.Active = true end)
+
+YesBtn.MouseButton1Click:Connect(function()
+	PlaySound("Click")
+	ConfirmFrame:Destroy()
+	MainFrame:Destroy() -- إخفاء وحذف القائمة
+	
+	-- شاشة تأثير تحميل الحذف التلقائي
+	local UnloadingFrame = Instance.new("Frame", ScreenGui)
+	UnloadingFrame.Size = UDim2.fromOffset(300, 70); UnloadingFrame.Position = UDim2.new(0.5, -150, 0.5, -35); UnloadingFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
+	Instance.new("UICorner", UnloadingFrame).CornerRadius = UDim.new(0, 8); local UlStroke = Instance.new("UIStroke", UnloadingFrame); UlStroke.Color = Color3.fromRGB(255, 100, 0)
+	
+	local UlLabel = Instance.new("TextLabel", UnloadingFrame)
+	UlLabel.Size = UDim2.new(1, 0, 0, 35); UlLabel.BackgroundTransparency = 1; UlLabel.Text = Vortex.SelectedLanguage == "AR" and "جاري حذف وإزالة السكربت..." or "Uninstalling & Clearing Script..."
+	UlLabel.Font = Enum.Font.GothamBold; UlLabel.TextColor3 = Color3.new(1,1,1); UlLabel.TextSize = 12
+	
+	local ProgressBarBg = Instance.new("Frame", UnloadingFrame); ProgressBarBg.Size = UDim2.new(1, -40, 0, 6); ProgressBarBg.Position = UDim2.new(0, 20, 1, -20); ProgressBarBg.BackgroundColor3 = Color3.fromRGB(25, 25, 30); Instance.new("UICorner", ProgressBarBg).CornerRadius = UDim.new(1,0)
+	local ProgressBar = Instance.new("Frame", ProgressBarBg); ProgressBar.Size = UDim2.fromScale(0, 1); ProgressBar.BackgroundColor3 = Color3.fromRGB(255, 60, 60); Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(1,0)
+	
+	local Tween = TweenService:Create(ProgressBar, TweenInfo.new(1.8, Enum.EasingStyle.Linear), {Size = UDim2.fromScale(1, 1)})
+	Tween:Play()
+	Tween.Completed:Connect(function()
+		ScreenGui:Destroy() -- تدمير وإخفاء كل شيء متصل بالسكربت والـ GUI نهائياً من الـ CoreGui
+		Vortex.Glass:Disable()
+	end)
+end)
+
+--// [تشغيل الأنظمة التلقائية المكملة للمظهر]
+Vortex.Effects:CursorGlow()
 
 return Vortex
